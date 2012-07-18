@@ -88,7 +88,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
     if (!chunkPool) {
         chunkPool=[NSMutableDictionary new];
     }
-    NSString* ckeid = [NSString stringWithFormat:@"%d-%d-%@", coord.x, coord.z, [socket description]];
+    NSString* ckeid = [NSString stringWithFormat:@"%d-%d-%d", coord.x, coord.z, [socket identifier]];
     MCChunk* chunk = [chunkPool objectForKey:ckeid];
     if (chunk || !alloc) {
         return chunk;
@@ -104,18 +104,14 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 
 +(void)deallocateAllChunksForSocket:(MCSocket*)socket
 {
-    /*
-     Asyyyyyync!
-     */
-    NSLog(@"Deallocating all the chunks!");
-    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
-    dispatch_async(queue, ^{
+    @synchronized(self)
+    {
         for (MCChunk* chunk in chunkPool) {
             if ([chunk socket] == socket) {
                 [chunk release];
             }
         }
-    });
+    }
 }
 
 +(MCChunk*)chunkAtCoord:(MCChunkCoord)coord forSocket:(MCSocket*)socket
@@ -125,7 +121,6 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 
 - (oneway void)dealloc
 {
-    NSLog(@"kthx");
     for (short i=0;i<16;i++) {
         if (((sections_bitmask >> i ) & 0x1) && sections[i]) {
             free(sections[i]);
@@ -133,7 +128,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
         }
     }
     [self retain];
-    NSString* ckeid = [NSString stringWithFormat:@"%d-%d-%@", x, z, [socket description]];
+    NSString* ckeid = [NSString stringWithFormat:@"%d-%d-%d", x, z, [socket identifier]];
     [chunkPool removeObjectForKey:ckeid];
     [super dealloc];
 }

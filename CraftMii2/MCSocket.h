@@ -33,6 +33,7 @@
     int lPacket;
     unsigned int ticks;
     unsigned int lpingtick;
+    int identifier;
 }
 @property(retain) NSInputStream *inputStream;
 @property(retain) NSOutputStream *outputStream;
@@ -45,6 +46,7 @@
 @property(retain) id<MCSocketDelegate> delegate;
 @property(retain) NSMutableData* buffer;
 @property(assign) unsigned int ticks;
+@property(assign) int identifier;
 - (MCSocket*)initWithServer:(NSString*)iserver andAuth:(MCAuth*)iauth;
 - (void)metadata:(MCMetadata*)metadata hasFinishedParsing:(NSArray*)infoArray;
 - (void)slot:(MCSlot*)slot hasFinishedParsing:(NSDictionary*)infoDict;

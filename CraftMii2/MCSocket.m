@@ -20,10 +20,15 @@
 #import "MCStream.h"
 #import "MCChunk.h"
 
+static int currentIdentifier = 0;
+
 @implementation MCSocket
-@synthesize inputStream, outputStream, auth, player, server, delegate, buffer, dataBuffer, metadataArea, outputBuffer, ticks;
+@synthesize inputStream, outputStream, auth, player, server, delegate, buffer, dataBuffer, metadataArea, outputBuffer, ticks, identifier;
 -(MCSocket*)initWithServer:(NSString*)iserver andAuth:(MCAuth*)iauth
 {
+    NSLog(@"ID: %d", currentIdentifier);
+    [self setIdentifier:currentIdentifier++];
+    NSLog(@"ID: %d", currentIdentifier);
     [self setAuth:iauth];
     [self setServer:iserver];
     return self;

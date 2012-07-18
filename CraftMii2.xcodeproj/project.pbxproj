@@ -17,7 +17,6 @@
 		EAD9201F15B6F73D00D4BB39 /* MCAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9201E15B6F73D00D4BB39 /* MCAppDelegate.m */; };
 		EAD9202115B6F73D00D4BB39 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = EAD9202015B6F73D00D4BB39 /* Shader.fsh */; };
 		EAD9202315B6F73D00D4BB39 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = EAD9202215B6F73D00D4BB39 /* Shader.vsh */; };
-		EAD9202615B6F73D00D4BB39 /* MCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9202515B6F73D00D4BB39 /* MCViewController.m */; };
 		EAD9202915B6F73D00D4BB39 /* MCViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = EAD9202715B6F73D00D4BB39 /* MCViewController_iPhone.xib */; };
 		EAD9202C15B6F73D00D4BB39 /* MCViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = EAD9202A15B6F73D00D4BB39 /* MCViewController_iPad.xib */; };
 		EAD9206815B6F75F00D4BB39 /* MCBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9203415B6F75F00D4BB39 /* MCBuffer.m */; };
@@ -52,6 +51,7 @@
 		EAD9209215B6FAE700D4BB39 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9209115B6FAE700D4BB39 /* libz.dylib */; };
 		EAD9209515B6FAF500D4BB39 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9209315B6FAF500D4BB39 /* libcrypto.a */; };
 		EAD9209615B6FAF500D4BB39 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9209415B6FAF500D4BB39 /* libssl.a */; };
+		EAD920E415B7031B00D4BB39 /* MCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD920E315B7031A00D4BB39 /* MCViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,7 +70,6 @@
 		EAD9202015B6F73D00D4BB39 /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = Shaders/Shader.fsh; sourceTree = "<group>"; };
 		EAD9202215B6F73D00D4BB39 /* Shader.vsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = Shaders/Shader.vsh; sourceTree = "<group>"; };
 		EAD9202415B6F73D00D4BB39 /* MCViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MCViewController.h; sourceTree = "<group>"; };
-		EAD9202515B6F73D00D4BB39 /* MCViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MCViewController.m; sourceTree = "<group>"; };
 		EAD9202815B6F73D00D4BB39 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MCViewController_iPhone.xib; sourceTree = "<group>"; };
 		EAD9202B15B6F73D00D4BB39 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MCViewController_iPad.xib; sourceTree = "<group>"; };
 		EAD9203315B6F75F00D4BB39 /* MCBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCBuffer.h; sourceTree = "<group>"; };
@@ -209,6 +208,7 @@
 		EAD920E015B6FB1400D4BB39 /* x509.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x509.h; sourceTree = "<group>"; };
 		EAD920E115B6FB1400D4BB39 /* x509_vfy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x509_vfy.h; sourceTree = "<group>"; };
 		EAD920E215B6FB1400D4BB39 /* x509v3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x509v3.h; sourceTree = "<group>"; };
+		EAD920E315B7031A00D4BB39 /* MCViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -276,8 +276,8 @@
 				EAD9208A15B6F82800D4BB39 /* MCLoginView.m */,
 				EAD9208B15B6F82800D4BB39 /* MCLoginView.xib */,
 				EAD9202215B6F73D00D4BB39 /* Shader.vsh */,
+				EAD920E315B7031A00D4BB39 /* MCViewController.m */,
 				EAD9202415B6F73D00D4BB39 /* MCViewController.h */,
-				EAD9202515B6F73D00D4BB39 /* MCViewController.m */,
 				EAD9202715B6F73D00D4BB39 /* MCViewController_iPhone.xib */,
 				EAD9202A15B6F73D00D4BB39 /* MCViewController_iPad.xib */,
 				EAD9201515B6F73D00D4BB39 /* Supporting Files */,
@@ -507,7 +507,6 @@
 			files = (
 				EAD9201B15B6F73D00D4BB39 /* main.m in Sources */,
 				EAD9201F15B6F73D00D4BB39 /* MCAppDelegate.m in Sources */,
-				EAD9202615B6F73D00D4BB39 /* MCViewController.m in Sources */,
 				EAD9206815B6F75F00D4BB39 /* MCBuffer.m in Sources */,
 				EAD9206915B6F75F00D4BB39 /* MCChatPacket.m in Sources */,
 				EAD9206A15B6F75F00D4BB39 /* MCRespawnPacket.m in Sources */,
@@ -536,6 +535,7 @@
 				EAD9208115B6F75F00D4BB39 /* MBProgressHUD.m in Sources */,
 				EAD9208C15B6F82800D4BB39 /* MCLoginView.m in Sources */,
 				EAD9209015B6F83C00D4BB39 /* MCLoginView4iPadViewController.m in Sources */,
+				EAD920E415B7031B00D4BB39 /* MCViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
