@@ -1,0 +1,312 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EAD9200B15B6F73D00D4BB39 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200A15B6F73D00D4BB39 /* UIKit.framework */; };
+		EAD9200D15B6F73D00D4BB39 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200C15B6F73D00D4BB39 /* Foundation.framework */; };
+		EAD9200F15B6F73D00D4BB39 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200E15B6F73D00D4BB39 /* CoreGraphics.framework */; };
+		EAD9201115B6F73D00D4BB39 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9201015B6F73D00D4BB39 /* GLKit.framework */; };
+		EAD9201315B6F73D00D4BB39 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9201215B6F73D00D4BB39 /* OpenGLES.framework */; };
+		EAD9201915B6F73D00D4BB39 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = EAD9201715B6F73D00D4BB39 /* InfoPlist.strings */; };
+		EAD9201B15B6F73D00D4BB39 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9201A15B6F73D00D4BB39 /* main.m */; };
+		EAD9201F15B6F73D00D4BB39 /* MCAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9201E15B6F73D00D4BB39 /* MCAppDelegate.m */; };
+		EAD9202115B6F73D00D4BB39 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = EAD9202015B6F73D00D4BB39 /* Shader.fsh */; };
+		EAD9202315B6F73D00D4BB39 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = EAD9202215B6F73D00D4BB39 /* Shader.vsh */; };
+		EAD9202615B6F73D00D4BB39 /* MCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9202515B6F73D00D4BB39 /* MCViewController.m */; };
+		EAD9202915B6F73D00D4BB39 /* MCViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = EAD9202715B6F73D00D4BB39 /* MCViewController_iPhone.xib */; };
+		EAD9202C15B6F73D00D4BB39 /* MCViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = EAD9202A15B6F73D00D4BB39 /* MCViewController_iPad.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		EAD9200615B6F73D00D4BB39 /* CraftMii2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CraftMii2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EAD9200A15B6F73D00D4BB39 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		EAD9200C15B6F73D00D4BB39 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		EAD9200E15B6F73D00D4BB39 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		EAD9201015B6F73D00D4BB39 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		EAD9201215B6F73D00D4BB39 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		EAD9201615B6F73D00D4BB39 /* CraftMii2-Info.plist */ = {isa = PBXFileReference; path = "CraftMii2-Info.plist"; sourceTree = "<group>"; };
+		EAD9201815B6F73D00D4BB39 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		EAD9201A15B6F73D00D4BB39 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		EAD9201C15B6F73D00D4BB39 /* CraftMii2-Prefix.pch */ = {isa = PBXFileReference; path = "CraftMii2-Prefix.pch"; sourceTree = "<group>"; };
+		EAD9201D15B6F73D00D4BB39 /* MCAppDelegate.h */ = {isa = PBXFileReference; path = MCAppDelegate.h; sourceTree = "<group>"; };
+		EAD9201E15B6F73D00D4BB39 /* MCAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MCAppDelegate.m; sourceTree = "<group>"; };
+		EAD9202015B6F73D00D4BB39 /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = Shaders/Shader.fsh; sourceTree = "<group>"; };
+		EAD9202215B6F73D00D4BB39 /* Shader.vsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = Shaders/Shader.vsh; sourceTree = "<group>"; };
+		EAD9202415B6F73D00D4BB39 /* MCViewController.h */ = {isa = PBXFileReference; path = MCViewController.h; sourceTree = "<group>"; };
+		EAD9202515B6F73D00D4BB39 /* MCViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MCViewController.m; sourceTree = "<group>"; };
+		EAD9202815B6F73D00D4BB39 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MCViewController_iPhone.xib; sourceTree = "<group>"; };
+		EAD9202B15B6F73D00D4BB39 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MCViewController_iPad.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EAD9200315B6F73D00D4BB39 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EAD9200B15B6F73D00D4BB39 /* UIKit.framework in Frameworks */,
+				EAD9200D15B6F73D00D4BB39 /* Foundation.framework in Frameworks */,
+				EAD9200F15B6F73D00D4BB39 /* CoreGraphics.framework in Frameworks */,
+				EAD9201115B6F73D00D4BB39 /* GLKit.framework in Frameworks */,
+				EAD9201315B6F73D00D4BB39 /* OpenGLES.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EAD91FFB15B6F73C00D4BB39 = {
+			isa = PBXGroup;
+			children = (
+				EAD9201415B6F73D00D4BB39 /* CraftMii2 */,
+				EAD9200915B6F73D00D4BB39 /* Frameworks */,
+				EAD9200715B6F73D00D4BB39 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EAD9200715B6F73D00D4BB39 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EAD9200615B6F73D00D4BB39 /* CraftMii2.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EAD9200915B6F73D00D4BB39 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EAD9200A15B6F73D00D4BB39 /* UIKit.framework */,
+				EAD9200C15B6F73D00D4BB39 /* Foundation.framework */,
+				EAD9200E15B6F73D00D4BB39 /* CoreGraphics.framework */,
+				EAD9201015B6F73D00D4BB39 /* GLKit.framework */,
+				EAD9201215B6F73D00D4BB39 /* OpenGLES.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EAD9201415B6F73D00D4BB39 /* CraftMii2 */ = {
+			isa = PBXGroup;
+			children = (
+				EAD9201D15B6F73D00D4BB39 /* MCAppDelegate.h */,
+				EAD9201E15B6F73D00D4BB39 /* MCAppDelegate.m */,
+				EAD9202015B6F73D00D4BB39 /* Shader.fsh */,
+				EAD9202215B6F73D00D4BB39 /* Shader.vsh */,
+				EAD9202415B6F73D00D4BB39 /* MCViewController.h */,
+				EAD9202515B6F73D00D4BB39 /* MCViewController.m */,
+				EAD9202715B6F73D00D4BB39 /* MCViewController_iPhone.xib */,
+				EAD9202A15B6F73D00D4BB39 /* MCViewController_iPad.xib */,
+				EAD9201515B6F73D00D4BB39 /* Supporting Files */,
+			);
+			path = CraftMii2;
+			sourceTree = "<group>";
+		};
+		EAD9201515B6F73D00D4BB39 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				EAD9201615B6F73D00D4BB39 /* CraftMii2-Info.plist */,
+				EAD9201715B6F73D00D4BB39 /* InfoPlist.strings */,
+				EAD9201A15B6F73D00D4BB39 /* main.m */,
+				EAD9201C15B6F73D00D4BB39 /* CraftMii2-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EAD9200515B6F73D00D4BB39 /* CraftMii2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EAD9202F15B6F73D00D4BB39 /* Build configuration list for PBXNativeTarget "CraftMii2" */;
+			buildPhases = (
+				EAD9200215B6F73D00D4BB39 /* Sources */,
+				EAD9200315B6F73D00D4BB39 /* Frameworks */,
+				EAD9200415B6F73D00D4BB39 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CraftMii2;
+			productName = CraftMii2;
+			productReference = EAD9200615B6F73D00D4BB39 /* CraftMii2.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EAD91FFD15B6F73C00D4BB39 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = MC;
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = EAD9200015B6F73C00D4BB39 /* Build configuration list for PBXProject "CraftMii2" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = EAD91FFB15B6F73C00D4BB39;
+			productRefGroup = EAD9200715B6F73D00D4BB39 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EAD9200515B6F73D00D4BB39 /* CraftMii2 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EAD9200415B6F73D00D4BB39 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EAD9201915B6F73D00D4BB39 /* InfoPlist.strings in Resources */,
+				EAD9202115B6F73D00D4BB39 /* Shader.fsh in Resources */,
+				EAD9202315B6F73D00D4BB39 /* Shader.vsh in Resources */,
+				EAD9202915B6F73D00D4BB39 /* MCViewController_iPhone.xib in Resources */,
+				EAD9202C15B6F73D00D4BB39 /* MCViewController_iPad.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EAD9200215B6F73D00D4BB39 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EAD9201B15B6F73D00D4BB39 /* main.m in Sources */,
+				EAD9201F15B6F73D00D4BB39 /* MCAppDelegate.m in Sources */,
+				EAD9202615B6F73D00D4BB39 /* MCViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		EAD9201715B6F73D00D4BB39 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EAD9201815B6F73D00D4BB39 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		EAD9202715B6F73D00D4BB39 /* MCViewController_iPhone.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EAD9202815B6F73D00D4BB39 /* en */,
+			);
+			name = MCViewController_iPhone.xib;
+			sourceTree = "<group>";
+		};
+		EAD9202A15B6F73D00D4BB39 /* MCViewController_iPad.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EAD9202B15B6F73D00D4BB39 /* en */,
+			);
+			name = MCViewController_iPad.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		EAD9202D15B6F73D00D4BB39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EAD9202E15B6F73D00D4BB39 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EAD9203015B6F73D00D4BB39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "CraftMii2/CraftMii2-Prefix.pch";
+				"GCC_THUMB_SUPPORT[arch=armv6]" = "";
+				INFOPLIST_FILE = "CraftMii2/CraftMii2-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		EAD9203115B6F73D00D4BB39 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "CraftMii2/CraftMii2-Prefix.pch";
+				"GCC_THUMB_SUPPORT[arch=armv6]" = "";
+				INFOPLIST_FILE = "CraftMii2/CraftMii2-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EAD9200015B6F73C00D4BB39 /* Build configuration list for PBXProject "CraftMii2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EAD9202D15B6F73D00D4BB39 /* Debug */,
+				EAD9202E15B6F73D00D4BB39 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EAD9202F15B6F73D00D4BB39 /* Build configuration list for PBXNativeTarget "CraftMii2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EAD9203015B6F73D00D4BB39 /* Debug */,
+				EAD9203115B6F73D00D4BB39 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EAD91FFD15B6F73C00D4BB39 /* Project object */;
+}
