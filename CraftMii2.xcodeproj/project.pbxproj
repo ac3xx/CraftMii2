@@ -52,6 +52,10 @@
 		EAD9209515B6FAF500D4BB39 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9209315B6FAF500D4BB39 /* libcrypto.a */; };
 		EAD9209615B6FAF500D4BB39 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9209415B6FAF500D4BB39 /* libssl.a */; };
 		EAD920E415B7031B00D4BB39 /* MCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD920E315B7031A00D4BB39 /* MCViewController.m */; };
+		EAD920EC15B720E700D4BB39 /* joypad.png in Resources */ = {isa = PBXBuildFile; fileRef = EAD920EA15B720E600D4BB39 /* joypad.png */; };
+		EAD920ED15B720E700D4BB39 /* joypadCap.png in Resources */ = {isa = PBXBuildFile; fileRef = EAD920EB15B720E700D4BB39 /* joypadCap.png */; };
+		EAD920F115B7504E00D4BB39 /* MCWorld.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD920EF15B7504B00D4BB39 /* MCWorld.m */; };
+		EAD920F515B7510600D4BB39 /* MCBoundingBox.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD920F415B7510500D4BB39 /* MCBoundingBox.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -209,6 +213,12 @@
 		EAD920E115B6FB1400D4BB39 /* x509_vfy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x509_vfy.h; sourceTree = "<group>"; };
 		EAD920E215B6FB1400D4BB39 /* x509v3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x509v3.h; sourceTree = "<group>"; };
 		EAD920E315B7031A00D4BB39 /* MCViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCViewController.m; sourceTree = "<group>"; };
+		EAD920EA15B720E600D4BB39 /* joypad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = joypad.png; sourceTree = "<group>"; };
+		EAD920EB15B720E700D4BB39 /* joypadCap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = joypadCap.png; sourceTree = "<group>"; };
+		EAD920EE15B7504A00D4BB39 /* MCWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCWorld.h; sourceTree = "<group>"; };
+		EAD920EF15B7504B00D4BB39 /* MCWorld.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCWorld.m; sourceTree = "<group>"; };
+		EAD920F315B7510400D4BB39 /* MCBoundingBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCBoundingBox.h; sourceTree = "<group>"; };
+		EAD920F415B7510500D4BB39 /* MCBoundingBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCBoundingBox.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -237,6 +247,8 @@
 				EAD9209315B6FAF500D4BB39 /* libcrypto.a */,
 				EAD9209415B6FAF500D4BB39 /* libssl.a */,
 				EAD9209115B6FAE700D4BB39 /* libz.dylib */,
+				EAD920EA15B720E600D4BB39 /* joypad.png */,
+				EAD920EB15B720E700D4BB39 /* joypadCap.png */,
 				EAD9201415B6F73D00D4BB39 /* CraftMii2 */,
 				EAD9200915B6F73D00D4BB39 /* Frameworks */,
 				EAD9200715B6F73D00D4BB39 /* Products */,
@@ -333,6 +345,10 @@
 				EAD9205215B6F75F00D4BB39 /* MCPacket.m */,
 				EAD9205315B6F75F00D4BB39 /* MCChunk.h */,
 				EAD9205415B6F75F00D4BB39 /* MCChunk.m */,
+				EAD920EE15B7504A00D4BB39 /* MCWorld.h */,
+				EAD920EF15B7504B00D4BB39 /* MCWorld.m */,
+				EAD920F315B7510400D4BB39 /* MCBoundingBox.h */,
+				EAD920F415B7510500D4BB39 /* MCBoundingBox.m */,
 				EAD9205515B6F75F00D4BB39 /* MCPlayer.h */,
 				EAD9205615B6F75F00D4BB39 /* MCPlayer.m */,
 				EAD9205715B6F75F00D4BB39 /* MCSlot.h */,
@@ -495,6 +511,8 @@
 				EAD9202915B6F73D00D4BB39 /* MCViewController_iPhone.xib in Resources */,
 				EAD9202C15B6F73D00D4BB39 /* MCViewController_iPad.xib in Resources */,
 				EAD9208D15B6F82800D4BB39 /* MCLoginView.xib in Resources */,
+				EAD920EC15B720E700D4BB39 /* joypad.png in Resources */,
+				EAD920ED15B720E700D4BB39 /* joypadCap.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -536,6 +554,8 @@
 				EAD9208C15B6F82800D4BB39 /* MCLoginView.m in Sources */,
 				EAD9209015B6F83C00D4BB39 /* MCLoginView4iPadViewController.m in Sources */,
 				EAD920E415B7031B00D4BB39 /* MCViewController.m in Sources */,
+				EAD920F115B7504E00D4BB39 /* MCWorld.m in Sources */,
+				EAD920F515B7510600D4BB39 /* MCBoundingBox.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

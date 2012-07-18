@@ -19,11 +19,13 @@
 #import "MCBuffer.h"
 #import "MCStream.h"
 #import "MCChunk.h"
+#import "MCPlayer.h"
+#import "MCWorld.h"
 
 static int currentIdentifier = 0;
 
 @implementation MCSocket
-@synthesize inputStream, outputStream, auth, player, server, delegate, buffer, dataBuffer, metadataArea, outputBuffer, ticks, identifier;
+@synthesize inputStream, outputStream, auth, player, server, delegate, buffer, dataBuffer, metadataArea, outputBuffer, ticks, identifier, world;
 -(MCSocket*)initWithServer:(NSString*)iserver andAuth:(MCAuth*)iauth
 {
     NSLog(@"ID: %d", currentIdentifier);
@@ -125,6 +127,11 @@ static int currentIdentifier = 0;
             ticks++;
         }
         [outputBuffer tick];
+        if ([delegate respondsToSelector:@selector(socketDidTick:)]) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [delegate socketDidTick:self];
+            });
+        }
     }
 }
 - (void)slot:(MCSlot*)slot hasFinishedParsing:(NSDictionary*)infoDict
@@ -166,15 +173,15 @@ static int currentIdentifier = 0;
                  nil];*/
                 if ([packet identifier] == 0x33)
                 {
-                    [[MCChunk chunkAtCoord:MCChunkCoordMake([[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Z"] intValue]) forSocket:self] updateChunk:infoDict];
+                    [world updateChunk:infoDict];
                 }
                 else if ([packet identifier] == 0x32)
                 {
                     if ([[infoDict objectForKey:@"PacketType"] isEqualToString:@"AllocateColumn"]) {
-                        [MCChunk chunkAtCoord:MCChunkCoordMake([[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Z"] intValue]) forSocket:self allocate:YES];
+                        [world allocateChunk:infoDict];
                     }
                     else {
-                        [[MCChunk chunkAtCoord:MCChunkCoordMake([[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Z"] intValue]) forSocket:self allocate:NO] release];
+                        [world deallocateChunk:infoDict];
                     }
                 }
                 else if ([packet identifier] == 0x0D)
@@ -190,12 +197,12 @@ static int currentIdentifier = 0;
                 }
                 else if ([packet identifier] == 0x01)
                 {
-                    player = [MCEntity entityWithIdentifier:[[infoDict objectForKey:@"EntityID"] intValue]];
+                    player = [MCPlayer entityWithIdentifier:[[infoDict objectForKey:@"EntityID"] intValue]];
                     [player setGamemode:[infoDict objectForKey:@"GameMode"]];
                 }
                 else if ([packet identifier] == 0x09)
                 {
-                    [MCChunk deallocateAllChunksForSocket:self];
+                    [world chunk];
                     [player setGamemode:[infoDict objectForKey:@"GameMode"]];
                 }
                 else if ([packet identifier] == 0x46)
@@ -295,6 +302,7 @@ static int currentIdentifier = 0;
     free((void*)[self metadataArea]);
     [self setBuffer:nil];
     [self setAuth:nil];
+    [self setWorld:nil];
     [super dealloc];
 }
 @end

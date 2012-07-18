@@ -8,6 +8,17 @@
 
 #import "MCPlayerPositionLookPacket.h"
 #import "MCBuffer.h"
+typedef union MCType32
+{
+float f;
+int i;
+} MCType32;
+
+typedef union MCType64
+{
+double d;
+long long l;
+} MCType64;
 /*
  [NSNumber numberWithDouble:*(double*)x], @"X",
  [NSNumber numberWithDouble:*(double*)stance], @"Stance",
@@ -35,22 +46,26 @@
 -(void)sendToSocket:(MCSocket *)socket
 {
     [[socket outputBuffer] writeByte:(uint8_t)0x0D];
-    uint64_t xf = 0;
-    uint64_t* xpt = &xf;
-    uint32_t yf = 0;
-    uint32_t* ypt = &yf;
-    xf=OSSwapInt64(*(uint64_t*)&x);
-    [[socket outputBuffer] write:((uint8_t*)((const void*)((const uint64_t*)xpt))) length:8];
-    xf=OSSwapInt64(*(uint64_t*)&y);
-    [[socket outputBuffer] write:((uint8_t*)((const void*)((const uint64_t*)xpt))) length:8];
-    xf=OSSwapInt64(*(uint64_t*)&stance);
-    [[socket outputBuffer] write:((uint8_t*)((const void*)((const uint64_t*)xpt))) length:8];
-    xf=OSSwapInt64(*(uint64_t*)&z);
-    [[socket outputBuffer] write:((uint8_t*)((const void*)((const uint64_t*)xpt))) length:8];
-    yf=OSSwapInt32(*(uint32_t*)&yaw);
-    [[socket outputBuffer] write:((uint8_t*)((const void*)((const uint32_t*)ypt))) length:4];
-    yf=OSSwapInt32(*(uint32_t*)&pitch);
-    [[socket outputBuffer] write:((uint8_t*)((const void*)((const uint32_t*)ypt))) length:4];
+    MCType32 a;
+    MCType64 b;
+    b.d = x;
+    b.l = OSSwapInt64(b.l);
+    [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
+    b.d = y;
+    b.l = OSSwapInt64(b.l);
+    [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
+    b.d = stance;
+    b.l = OSSwapInt64(b.l);
+    [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
+    b.d = z;
+    b.l = OSSwapInt64(b.l);
+    [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
+    a.f = yaw;
+    a.i = OSSwapInt32(a.i);
+    [[socket outputBuffer] write:(uint_fast8_t*)&(a.i) length:4];
+    a.f = pitch;
+    a.i = OSSwapInt32(a.i);
+    [[socket outputBuffer] write:(uint_fast8_t*)&(a.i) length:4];
     [[socket outputBuffer] writeByte:(uint8_t)onGround];
 }
 -(void)dealloc

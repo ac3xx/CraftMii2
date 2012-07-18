@@ -16,12 +16,14 @@
 @class MCSlot;
 @class MCMetadata;
 @class MCChunk;
+@class MCPlayer;
+@class MCWorld;
 @interface MCSocket : NSObject <NSStreamDelegate>
 {
     NSInputStream *inputStream;
     NSOutputStream *outputStream;
     MCAuth* auth;
-    MCEntity* player;
+    MCPlayer* player;
     NSString* server;
     id<MCSocketDelegate> delegate;
     NSMutableData* buffer;
@@ -34,6 +36,7 @@
     unsigned int ticks;
     unsigned int lpingtick;
     int identifier;
+    MCWorld* world;
 }
 @property(retain) NSInputStream *inputStream;
 @property(retain) NSOutputStream *outputStream;
@@ -41,12 +44,13 @@
 @property(assign) unsigned const char * metadataArea;
 @property(retain) MCAuth* auth;
 @property(retain) NSString* server;
-@property(readonly) MCEntity* player;
+@property(readonly) MCPlayer* player;
 @property(retain) MCBuffer* outputBuffer;
 @property(retain) id<MCSocketDelegate> delegate;
 @property(retain) NSMutableData* buffer;
 @property(assign) unsigned int ticks;
 @property(assign) int identifier;
+@property(retain) MCWorld* world;
 - (MCSocket*)initWithServer:(NSString*)iserver andAuth:(MCAuth*)iauth;
 - (void)metadata:(MCMetadata*)metadata hasFinishedParsing:(NSArray*)infoArray;
 - (void)slot:(MCSlot*)slot hasFinishedParsing:(NSDictionary*)infoDict;

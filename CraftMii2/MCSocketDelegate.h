@@ -11,6 +11,7 @@
 @class MCPacket;
 @class MCSlot;
 @class MCChunk;
+@class MCSocket;
 @protocol MCSocketDelegate <NSObject>
 @optional
 - (void)slot:(MCSlot*)slot hasFinishedParsing:(NSDictionary*)infoDict;
@@ -20,4 +21,6 @@
 - (void)packet:(MCPacket*)packet gotParsed:(NSDictionary*)infoDict;
 @optional
 - (void)chunkDidUpdate:(MCChunk*)chunk;
+@optional
+- (void)socketDidTick:(MCSocket*)socket;
 @end

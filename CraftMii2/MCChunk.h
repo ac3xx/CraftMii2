@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MCSocket.h"
-
+@class MCWorld;
 typedef enum MCBiome
 {
     MCBiomeOcean,
@@ -111,14 +111,11 @@ MCChunkCoord chunkCoordForEntityCoord(MCCoord orig);
     int sections_bitmask;
     MCSection* sections[16];
     MCBiome biomes[16*16];
-    MCSocket* socket;
+    MCWorld* world;
 }
 @property(assign) int x;
 @property(assign) int z;
-@property(assign) MCSocket* socket;
-+(MCChunk*)chunkAtCoord:(MCChunkCoord)coord forSocket:(MCSocket*)socket;
-+(MCChunk*)chunkAtCoord:(MCChunkCoord)coord forSocket:(MCSocket*)socket allocate:(BOOL)alloc;
-+(void)deallocateAllChunksForSocket:(MCSocket*)socket;
+@property(assign) MCWorld* world;
 -(void)updateChunk:(NSDictionary*)infoDict;
 -(MCSection*)sectionForBlockCoord:(MCBlockCoord)coord;
 -(MCSection*)sectionForYRel:(short)y;

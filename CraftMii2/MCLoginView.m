@@ -222,6 +222,11 @@
     }
 }
 
+- (void)socketDidTick:(MCSocket*)socket
+{
+    [game socketDidTick:socket];
+}
+
 - (void)doLogin:(NSArray* )infos
 {
     auth = [MCAuth authWithUsername:[user text] andPassword:[pass text]];

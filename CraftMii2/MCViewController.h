@@ -22,6 +22,21 @@
     UIProgressView* lifeview;
     UIProgressView* foodview;
     UIProgressView* satview_;
+    unsigned int joypadCenterX;
+    unsigned int joypadCenterY;
+    unsigned int joypadRadius;
+    unsigned int joypadWidth;
+    unsigned int joypadHeight;
+    int touchHash;
+    int touchHash2;
+    CGPoint sPoint;
+    float mAngle;
+    float sAngle;
+    float touchAngle;
+    float touchDistance;
+    UIImageView* joypadCap;
+    UIImageView* joypad;
+    BOOL joypadMoving;
 }
 @property(retain)MCSocket* socket;
 

@@ -9,7 +9,11 @@
 #import "MCViewController.h"
 #import "MCRespawnPacket.h"
 #import "MCPacket.h"
-#define PLAYER_SPEED 0.2155
+#import "MCSocket.h"
+#import "MCPlayer.h"
+
+#define YTOUCH_SPEED 0.001f
+#define PTOUCH_SPEED 0.001f
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 // Uniform index.
@@ -111,6 +115,25 @@ GLfloat gCubeVertexData[216] =
     [super dealloc];
 }
 
+#define RAD2DEG(x) (x * (180.0f / M_PI))
+#define DEG2RAD(x) (x * (M_PI / 180.0f))
+
+- (void)socketDidTick:(MCSocket*)socket_
+{
+    if (touchDistance) {
+        float rel = RAD2DEG(touchAngle);
+        [[socket_ player] setZ:[[socket_ player] z]+(0.5f*sin(DEG2RAD(fmod(rel + [[socket_ player] yaw] - 90.0f, 360))))];
+        [[socket_ player] setX:[[socket_ player] x]+(0.5f*cos(DEG2RAD(fmod(rel + [[socket_ player] yaw] - 90.0f, 360))))];
+    }
+    else if(touchHash2)
+    {
+        [[socket_ player] setYaw:fmod([[socket_ player] yaw] + RAD2DEG(sAngle), 360.0f)];
+        [[socket_ player] setPitch:fmod([[socket_ player] pitch] + RAD2DEG(mAngle), 90.0f)];
+        mAngle = 0;
+        sAngle = 0;
+    }
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -126,15 +149,22 @@ GLfloat gCubeVertexData[216] =
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     
     CGRect sz = [[UIScreen mainScreen] bounds];
-    expview = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
+    joypadCap = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"joypadCap.png"]] autorelease];
+    joypad = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"joypad.png"]] autorelease];
+    [joypad setFrame:CGRectMake(20, sz.size.width-160, 140, 140)];
+    [joypadCap setCenter:[joypad center]];
+    joypadCenterX = joypad.center.x;
+    joypadCenterY = joypad.center.y;
+    joypadRadius=60;
+    expview = [[[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar] autorelease];
     [expview setFrame:CGRectMake(10, 10, sz.size.height-20, 10)];
-    lifeview = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
+    lifeview = [[[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar] autorelease];
     [lifeview setFrame:CGRectMake(10, 30, (sz.size.height/2)-15, 10)];
-    foodview = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
+    foodview = [[[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar] autorelease];
     [foodview setFrame:CGRectMake((sz.size.height/2)+5, 30, (sz.size.height/2) - 30, 10)];
-    satview_ = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
+    satview_ = [[[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar] autorelease];
     [satview_ setFrame:CGRectMake(((sz.size.height) - 20), 30, 10, 10)];
-    levelview = [[UILabel alloc] initWithFrame:CGRectZero];
+    levelview = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
     [levelview setBackgroundColor:[UIColor clearColor]];
     [levelview setFont:[UIFont boldSystemFontOfSize:24]];
     [levelview setText:@"0"];
@@ -152,8 +182,74 @@ GLfloat gCubeVertexData[216] =
     [view addSubview:foodview];
     [view addSubview:satview_];
     [view addSubview:levelview];
+    [view addSubview:joypad];
+    [view addSubview:joypadCap];
     [self setupGL];
 }
+
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+	NSSet *allTouches = [event allTouches];
+    for (UITouch *touch in allTouches) {
+        CGPoint touchLocation = [touch locationInView:self.view];
+        CGRect sz = [[UIScreen mainScreen] bounds];
+        if (CGRectContainsPoint(CGRectMake(0, sz.size.width/3.0f, sz.size.height/2.0f, sz.size.width/1.5f), touchLocation) && !joypadMoving) {
+            NSLog(@"Valid!");
+            joypadMoving = YES;
+            touchHash = [touch hash];
+        } else {
+            touchHash2 = [touch hash];
+            sPoint = touchLocation;
+        }
+    }
+}
+
+
+- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+    NSSet *allTouches = [event allTouches];
+    for (UITouch *touch in allTouches) {
+        CGPoint touchLocation = [touch locationInView:self.view];
+		if ([touch hash] == touchHash && joypadMoving) {
+			float dx = (float)joypadCenterX - (float)touchLocation.x;
+			float dy = (float)joypadCenterY - (float)touchLocation.y;
+			touchDistance = fabs(sqrtf((joypadCenterX - touchLocation.x) * (joypadCenterX - touchLocation.x) + 
+                                  (joypadCenterY - touchLocation.y) * (joypadCenterY - touchLocation.y)));
+            touchAngle = atan2(dx, -dy);
+			if (touchDistance > joypadRadius) {
+                joypadCap.center = CGPointMake(joypadCenterX - cosf(atan2(dy, dx)) * joypadRadius, 
+                                               joypadCenterY - sinf(atan2(dy, dx)) * joypadRadius);
+			} else {
+				joypadCap.center = touchLocation;
+			}
+		} else if ([touch hash] == touchHash2)
+        {
+            float x = sinf((sPoint.x - touchLocation.x) * YTOUCH_SPEED) * cosf((sPoint.x - touchLocation.x) * YTOUCH_SPEED);
+            float y = sinf((sPoint.y - touchLocation.y) * PTOUCH_SPEED);
+            float z = cosf((sPoint.x - touchLocation.x) * YTOUCH_SPEED) * cosf((sPoint.y - touchLocation.y) * PTOUCH_SPEED);
+            float distance = sqrtf(z*z + x*x);
+            sAngle += -atan2(x, z);
+            mAngle += -atan2(y, distance);
+        }
+	}
+}
+
+
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+	for (UITouch *touch in touches) {
+		if ([touch hash] == touchHash) {
+			joypadMoving = NO;
+			touchHash = 0;
+			touchDistance = 0;
+			touchAngle = 0;
+			joypadCap.center = CGPointMake(joypadCenterX, joypadCenterY);
+			return;
+		} else if ([touch hash] == touchHash2)
+        {
+            sPoint = CGPointMake(0, 0);
+            touchHash2 = 0;
+        }
+	}
+}
+
 
 - (void)metadata:(MCMetadata *)metadata hasFinishedParsing:(NSArray *)infoArray
 {
@@ -231,6 +327,7 @@ GLfloat gCubeVertexData[216] =
         [lifeview setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
         [foodview setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
         [satview_ setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
+        [[[packet sock] player] setFlying:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
     }
     else if (((unsigned char)[packet identifier]) == 0x03) {
         NSLog(@"%@", infoDict);

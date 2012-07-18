@@ -21,7 +21,7 @@
     if (entity) {
         return entity;
     }
-    entity = [MCEntity new];
+    entity = [self new];
     [entity setEid:eid];
     [entityPool setObject:entity forKey:nseid];
     return entity;

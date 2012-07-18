@@ -47,7 +47,6 @@ MCChunkCoord chunkCoordForEntityCoord(MCCoord orig)
     return MCChunkCoordMake(x/16, z/16);
 }
 
-static NSMutableDictionary* chunkPool=nil;
 NSString* MCBiomeToNSString(MCBiome biome)
 {
     if (biome < __INTERNAL_MCBiomeEnumEnd) {
@@ -82,72 +81,19 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
     @"MCBiomeJungleHills"
 };
 @implementation MCChunk
-@synthesize x,z,socket;
-+(MCChunk*)chunkAtCoord:(MCChunkCoord)coord forSocket:(MCSocket*)socket allocate:(BOOL)alloc
-{
-    if (!chunkPool) {
-        chunkPool=[NSMutableDictionary new];
-    }
-    NSString* ckeid = [NSString stringWithFormat:@"%d-%d-%d", coord.x, coord.z, [socket identifier]];
-    MCChunk* chunk = [chunkPool objectForKey:ckeid];
-    if (chunk || !alloc) {
-        return chunk;
-    }
-    chunk = [MCChunk new];
-    [chunk setX:coord.x];
-    [chunk setZ:coord.z];
-    [chunk setSocket:socket];
-    [chunkPool setObject:chunk forKey:ckeid];
-    [chunk release];
-    return chunk;
-}
-
-+(void)deallocateAllChunksForSocket:(MCSocket*)socket
-{
-    @synchronized(self)
-    {
-        for (MCChunk* chunk in chunkPool) {
-            if ([chunk socket] == socket) {
-                [chunk release];
-            }
-        }
-    }
-}
-
-+(MCChunk*)chunkAtCoord:(MCChunkCoord)coord forSocket:(MCSocket*)socket
-{
-    return [self chunkAtCoord:coord forSocket:socket allocate:NO];
-}
+@synthesize x,z,world;
 
 - (oneway void)dealloc
 {
+    NSLog(@"kthxbai");
     for (short i=0;i<16;i++) {
         if (((sections_bitmask >> i ) & 0x1) && sections[i]) {
             free(sections[i]);
             sections[i] = NULL;
         }
     }
-    [self retain];
-    NSString* ckeid = [NSString stringWithFormat:@"%d-%d-%d", x, z, [socket identifier]];
-    [chunkPool removeObjectForKey:ckeid];
     [super dealloc];
 }
-/*
- NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
- [NSNumber numberWithInt:OSSwapInt32((*(int*)data))], @"X",
- [NSNumber numberWithInt:OSSwapInt32((*(int*)(data+4)))], @"Z",
- [NSNumber numberWithBool:((*(char*)(data+8)))], @"GroundUpContinuous",
- [NSNumber numberWithUnsignedShort:OSSwapInt16((*(short*)(data+9)))], @"PrimaryBit",
- [NSNumber numberWithUnsignedShort:OSSwapInt16((*(short*)(data+11)))], @"AddBit",
- [NSData dataWithBytes:(data+21) length:OSSwapInt32(*(int*)(data+13))], @"ChunkData",
- @"ChunkUpdate", @"PacketType",
- nil];
- NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
- [NSNumber numberWithInt:OSSwapInt32((*(int*)data))], @"X",
- [NSNumber numberWithInt:OSSwapInt32(*(int*)(data+4))], @"Z",
- ((*(char*)(data+8)) == 0) ? @"DellocateColumn" : @"AllocateColumn", @"PacketType",
- nil];
- */
 +(MCBlockCoord)absoluteCoordToSectionRelative:(MCBlockCoord)orig
 {
     return absoluteCoordToSectionRelative(orig);
@@ -156,6 +102,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 {
     return entityCoordToChunkSectionCoord(orig);
 }
+
 -(void)updateChunk:(NSDictionary*)infoDict
 {
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
@@ -185,7 +132,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                 if ((add >> i ) & 0x1) {
                     if (read+sizeof(MCSection) > [dt length]) {
                         NSLog(@"[Critical] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.");
-                        [socket disconnectWithReason:@"Chunk Error"];
+                        [[world socket] disconnectWithReason:@"Chunk Error"];
                         return;
                     }
                     memcpy(sections[i], db+(read), sizeof(MCSection));
@@ -201,7 +148,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
         {
             memcpy(biomes, db+read, sizeof(biomes));
         }
-        [socket chunkDidUpdate:self];
+        [[world socket] chunkDidUpdate:self];
     });
 }
 
@@ -226,6 +173,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 
 MCBlock getBlock(MCBlockCoord coord, MCSocket* socket)
 {
+    /*
     MCBlockCoord chunkCoord = entityCoordToChunkSectionCoord(coord);
     MCBlockCoord relativeCoord = absoluteCoordToSectionRelative(coord);
     MCChunk* chunk = [MCChunk chunkAtCoord:MCChunkCoordMake(chunkCoord.x, chunkCoord.z)  forSocket:socket];
@@ -236,4 +184,6 @@ MCBlock getBlock(MCBlockCoord coord, MCSocket* socket)
     MCBlock ret = MCBlockInSection(sect, relativeCoord);
     NSLog(@"ID of (X: [%d|%d|%d] Y: [%d|%d|%d] Z: [%d|%d|%d]) is: %d [%ld]", relativeCoord.x, chunkCoord.x, coord.x, relativeCoord.y, chunkCoord.y, coord.y, relativeCoord.z, chunkCoord.z, coord.z, ret.typedata, sizeof(MCBlock));
     return ret;
+     */
+    return (MCBlock){0,0,0,0};
 }
