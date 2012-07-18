@@ -7,7 +7,9 @@
 //
 
 #import "MCViewController.h"
-
+#import "MCRespawnPacket.h"
+#import "MCPacket.h"
+#define PLAYER_SPEED 0.2155
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 // Uniform index.
@@ -100,6 +102,7 @@ GLfloat gCubeVertexData[216] =
 
 @synthesize context = _context;
 @synthesize effect = _effect;
+@synthesize socket;
 
 - (void)dealloc
 {
@@ -122,8 +125,121 @@ GLfloat gCubeVertexData[216] =
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
     
+    CGRect sz = [[UIScreen mainScreen] bounds];
+    expview = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
+    [expview setFrame:CGRectMake(10, 10, sz.size.height-20, 10)];
+    lifeview = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
+    [lifeview setFrame:CGRectMake(10, 30, (sz.size.height/2)-15, 10)];
+    foodview = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
+    [foodview setFrame:CGRectMake((sz.size.height/2)+5, 30, (sz.size.height/2) - 30, 10)];
+    satview_ = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
+    [satview_ setFrame:CGRectMake(((sz.size.height) - 20), 30, 10, 10)];
+    levelview = [[UILabel alloc] initWithFrame:CGRectZero];
+    [levelview setBackgroundColor:[UIColor clearColor]];
+    [levelview setFont:[UIFont boldSystemFontOfSize:24]];
+    [levelview setText:@"0"];
+    [levelview sizeToFit];
+    [levelview setCenter:[expview center]];
+    [levelview setTextColor:[UIColor greenColor]];
+    [levelview setShadowOffset:CGSizeMake(1, 1)];
+    [levelview setShadowColor:[UIColor blackColor]];
+    [expview setHidden:YES];
+    [lifeview setHidden:YES];
+    [foodview setHidden:YES];
+    [satview_ setHidden:YES];
+    [view addSubview:expview];
+    [view addSubview:lifeview];
+    [view addSubview:foodview];
+    [view addSubview:satview_];
+    [view addSubview:levelview];
     [self setupGL];
 }
+
+- (void)metadata:(MCMetadata *)metadata hasFinishedParsing:(NSArray *)infoArray
+{
+    
+}
+
+- (void)slot:(MCSlot *)slot hasFinishedParsing:(NSDictionary *)infoDict
+{
+    NSDictionary* ench = [[[infoDict objectForKey:@"EnchantmentData"] objectForKey:@"tag"] objectForKey:@"ench"];
+    if (ench) {
+        for (NSDictionary* enchantment in ench) {
+            MCEnchantment idt = [[enchantment objectForKey:@"id"] intValue];
+            MCEnchantmentLevel lvl = [[enchantment objectForKey:@"lvl"] intValue];
+            NSLog(@"%@: %@", MCEnchantmentName(idt), MCEnchantmentLevelName(lvl));
+        }
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    switch (buttonIndex) {
+        case 0:
+            NSLog(@"Respawning");
+            [[MCRespawnPacket packetWithInfo:nil] sendToSocket:[self socket]];
+            break;
+            
+        default:
+            [[self socket] disconnect];
+            break;
+    }
+    [alertView release];
+    if (alertView == respawnAlert) respawnAlert = nil;
+}
+
+- (void)packet:(MCPacket*)packet gotParsed:(NSDictionary *)infoDict
+{
+    if (((unsigned char)[packet identifier]) == 0x0D) {
+        canSendPackets = YES;
+        tickCount = 1;
+        add = 1;
+    } 
+    else if (((unsigned char)[packet identifier] == 0x2B)) {
+        [expview setProgress:[[infoDict objectForKey:@"ExpBar"] floatValue]];
+        [[[packet sock] player] setLevel:[[infoDict objectForKey:@"Level"] shortValue]];
+        [levelview setText:[[infoDict objectForKey:@"Level"] description]];
+        [levelview sizeToFit];
+        [levelview setCenter:[expview center]];
+        [respawnAlert setMessage:[NSString stringWithFormat:@"You scored %d points", [[[packet sock] player] level]]];
+        NSLog(@"%f", [[infoDict objectForKey:@"ExpBar"] floatValue]);
+    } else if (((unsigned char)[packet identifier] == 0x08)) {
+        [lifeview setProgress:[[infoDict objectForKey:@"Health"] floatValue]/20.0];
+        [foodview setProgress:[[infoDict objectForKey:@"Food"] floatValue]/20.0];
+        [satview_ setProgress:[[infoDict objectForKey:@"Food Saturation"] floatValue]/5.0];
+        if ([[infoDict objectForKey:@"Health"] shortValue] <= 0) {
+            NSLog(@"Asking to respawn..");
+            respawnAlert = [UIAlertView new];
+            [respawnAlert setTitle:@"You have died!"];
+            [respawnAlert setMessage:[NSString stringWithFormat:@"You scored %d points", [[[packet sock] player] level]]];
+            [respawnAlert addButtonWithTitle:@"Respawn"];
+            [respawnAlert addButtonWithTitle:@"Disconnect"];
+            [respawnAlert setDelegate:self];
+            [respawnAlert show];
+        }
+    } else if (((unsigned char)[packet identifier]) == 0xFF) {
+        [expview removeFromSuperview];
+        [lifeview removeFromSuperview];
+        [levelview removeFromSuperview];
+        [foodview removeFromSuperview];
+        [satview_ removeFromSuperview];
+    } else if (((unsigned char)[packet identifier]) == 0x46 || ((unsigned char)[packet identifier]) == 0x01 || ((unsigned char)[packet identifier]) == 0x09)
+    {
+        NSLog(@"Updating Hidden Status: GameMode is %@", [[[packet sock] player] gamemode]);
+        [expview setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
+        [lifeview setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
+        [lifeview setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
+        [foodview setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
+        [satview_ setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
+    }
+    else if (((unsigned char)[packet identifier]) == 0x03) {
+        NSLog(@"%@", infoDict);
+    }/*
+      else if (((unsigned char)[packet identifier]) == 0x82) {
+      }*/
+}
+
+
 
 - (void)viewDidUnload
 {    
@@ -145,11 +261,7 @@ GLfloat gCubeVertexData[216] =
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
-    } else {
-        return YES;
-    }
+    return UIInterfaceOrientationIsLandscape(interfaceOrientation);
 }
 
 - (void)setupGL
@@ -195,6 +307,16 @@ GLfloat gCubeVertexData[216] =
 }
 
 #pragma mark - GLKView and GLKViewController delegate methods
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [self.navigationController setNavigationBarHidden:NO animated:NO];
+}
 
 - (void)update
 {

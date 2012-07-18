@@ -8,7 +8,21 @@
 
 #import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
+#import "MCSocket.h"
 
-@interface MCViewController : GLKViewController
+@interface MCViewController : GLKViewController <MCSocketDelegate>
+{
+    MCSocket* socket;
+    BOOL canSendPackets;
+    int tickCount;
+    int add;
+    UIProgressView* expview;
+    UILabel* levelview;
+    UIAlertView* respawnAlert;
+    UIProgressView* lifeview;
+    UIProgressView* foodview;
+    UIProgressView* satview_;
+}
+@property(retain)MCSocket* socket;
 
 @end

@@ -7,7 +7,8 @@
 //
 
 #import "MCAppDelegate.h"
-
+#import "MCLoginView.h"
+#import "MCLoginView4iPadViewController.h"
 #import "MCViewController.h"
 
 @implementation MCAppDelegate
@@ -26,10 +27,24 @@
 {
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     // Override point for customization after application launch.
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        self.viewController = [[[MCViewController alloc] initWithNibName:@"MCViewController_iPhone" bundle:nil] autorelease];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        MCLoginView4iPadViewController *masterViewController = [[[MCLoginView4iPadViewController alloc] init] autorelease];
+        UINavigationController *masterNavigationController = [[[UINavigationController alloc] initWithRootViewController:masterViewController] autorelease];
+        
+        MCLoginView *detailViewController = [[[MCLoginView alloc] initWithStyle:UITableViewStyleGrouped] autorelease];
+        UINavigationController *detailNavigationController = [[[UINavigationController alloc] initWithRootViewController:detailViewController] autorelease];
+        
+        masterViewController.detailController = detailViewController;
+        detailViewController.masterController = masterViewController;
+        
+        UISplitViewController* splitViewController = [[[UISplitViewController alloc] init] autorelease];
+        splitViewController.delegate = (id<UISplitViewControllerDelegate>) detailViewController;
+        splitViewController.viewControllers = [NSArray arrayWithObjects:masterNavigationController, detailNavigationController, nil];
+        [self setViewController: splitViewController];
     } else {
-        self.viewController = [[[MCViewController alloc] initWithNibName:@"MCViewController_iPad" bundle:nil] autorelease];
+        UINavigationController* _loginView = [[UINavigationController alloc] initWithRootViewController:[[[MCLoginView alloc] initWithStyle:UITableViewStyleGrouped] autorelease]];
+        // Creates the view(s) and adds them to the dire
+        [self setViewController: _loginView];
     }
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
