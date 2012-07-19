@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MCSocket.h"
 @class MCWorld;
+
 typedef enum MCBiome
 {
     MCBiomeOcean,
@@ -36,6 +37,7 @@ typedef enum MCBiome
     MCBiomeJungleHills,
     __INTERNAL_MCBiomeEnumEnd
 } MCBiome;
+
 extern NSString* __INTERNAL_MCBiomeNameStringMatrix[];
 extern NSString* MCBiomeToNSString(MCBiome biome);
 typedef struct MCChunkCoord
@@ -82,15 +84,7 @@ typedef struct MCSection
 */
 
 #define MCAnvilIndex(relativecoord) ((relativecoord.y << 4 | relativecoord.z) << 4 | relativecoord.x)
-#define MCBlockInSection(section, relativecoord) \
-    (MCBlock)\
-    {\
-        (       section->typedata[MCAnvilIndex(relativecoord)]) + \
-        (((     (section->addarray[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] & (__mod(relativecoord.x, 2)  ? 0x0F : 0xF0)) >> (__mod(relativecoord.x, 2)  ? 0 : 4)) & 0x0F) << 8),  \
-        (       (section->metadata[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] & (__mod(relativecoord.x, 2)  ? 0x0F : 0xF0)) >> (__mod(relativecoord.x, 2)  ? 0 : 4)) & 0x0F, \
-        (       (section->lightarr[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] & (__mod(relativecoord.x, 2)  ? 0x0F : 0xF0)) >> (__mod(relativecoord.x, 2)  ? 0 : 4)) & 0x0F, \
-        (       (section->skylight[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] & (__mod(relativecoord.x, 2)  ? 0x0F : 0xF0)) >> (__mod(relativecoord.x, 2)  ? 0 : 4)) & 0x0F,  \
-    }
+#define MCBlockInSection(section, relativecoord) MCGetBlockInSection(section, relativecoord)
 
 typedef struct MCBlock
 {
@@ -99,18 +93,18 @@ typedef struct MCBlock
     unsigned char light;
     unsigned char skylight;
 } MCBlock;
-
-MCBlockCoord absoluteCoordToSectionRelative(MCBlockCoord orig);
-MCBlockCoord entityCoordToChunkSectionCoord(MCBlockCoord orig);
-MCChunkCoord chunkCoordForEntityCoord(MCCoord orig);
-
+extern void MCSetBlockInSection(MCSection* section, MCBlockCoord relativecoord, MCBlock block);
+extern MCBlockCoord absoluteCoordToSectionRelative(MCBlockCoord orig);
+extern MCBlockCoord entityCoordToChunkSectionCoord(MCBlockCoord orig);
+extern MCChunkCoord chunkCoordForEntityCoord(MCCoord orig);
+extern MCBlock MCGetBlockInSection(MCSection* section, MCBlockCoord relativecoord);
 @interface MCChunk : NSObject
 {
     int x;
     int z;
     int sections_bitmask;
     MCSection* sections[16];
-    MCBiome biomes[16*16];
+    char biomes[16*16];
     MCWorld* world;
 }
 @property(assign) int x;

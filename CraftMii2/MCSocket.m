@@ -33,6 +33,8 @@ static int currentIdentifier = 0;
     NSLog(@"ID: %d", currentIdentifier);
     [self setAuth:iauth];
     [self setServer:iserver];
+    [self setWorld:[MCWorld new]];
+    [[self world] setSocket:self];
     return self;
 }
 -(void)threadLoop
@@ -183,6 +185,22 @@ static int currentIdentifier = 0;
                     else {
                         [world deallocateChunk:infoDict];
                     }
+                } else if ([packet identifier] == 0x34)
+                {
+                    [world updateChunk:infoDict];
+                }
+                else if ([packet identifier] == 0x35)
+                {
+                    /*
+                     [NSNumber numberWithInt:OSSwapInt32((*(int*)(data)))], @"X",
+                     [NSNumber numberWithChar:*(char*)(data+4)], @"Y",
+                     [NSNumber numberWithInt:OSSwapInt32((*(int*)(data+5)))], @"Z",
+                     [NSNumber numberWithChar:*(char*)(data+9)], @"BlockType",
+                     [NSNumber numberWithChar:*(char*)(data+10)], @"BlockMetadata",
+                     @"BlockChange", @"PacketType",
+                     */
+                    NSLog(@"%@", infoDict);
+                    [world setBlock:MCBlockCoordMake([[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Y"] charValue], [[infoDict objectForKey:@"Z"] intValue]) to:(MCBlock){[[infoDict objectForKey:@"BlockType"] shortValue], [[infoDict objectForKey:@"BlockMetadata"] charValue], 0,0}];
                 }
                 else if ([packet identifier] == 0x0D)
                 {
@@ -197,12 +215,12 @@ static int currentIdentifier = 0;
                 }
                 else if ([packet identifier] == 0x01)
                 {
-                    player = [MCPlayer entityWithIdentifier:[[infoDict objectForKey:@"EntityID"] intValue]];
+                    player = (id) [MCPlayer entityWithIdentifier:[[infoDict objectForKey:@"EntityID"] intValue]];
                     [player setGamemode:[infoDict objectForKey:@"GameMode"]];
                 }
                 else if ([packet identifier] == 0x09)
                 {
-                    [world chunk];
+                    [world deallocateChunks];
                     [player setGamemode:[infoDict objectForKey:@"GameMode"]];
                 }
                 else if ([packet identifier] == 0x46)
@@ -213,7 +231,7 @@ static int currentIdentifier = 0;
                 }
                 else if ([packet identifier] == 0x00)
                 {
-                    NSLog(@"%d", getBlock(MCBlockCoordMake([[self player] x], [[self player] y], [[self player] z]), self).typedata);
+                    NSLog(@"%d", [world getBlock:MCBlockCoordMake(-228, 69, 200)].typedata);
                     lpingtick = ticks;
                     [[MCPingPacket packetWithInfo:infoDict] sendToSocket:self];
                 }

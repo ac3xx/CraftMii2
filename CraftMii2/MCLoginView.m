@@ -190,11 +190,14 @@
         {
             if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
                 game = [[[MCViewController alloc] initWithNibName:@"MCViewController_iPhone" bundle:nil] autorelease];
+                [[self navigationController] presentModalViewController:game animated:YES];
             } else {
                 game = [[[MCViewController alloc] initWithNibName:@"MCViewController_iPad" bundle:nil] autorelease];
+                //[[self navigationController] splitViewController].modalPresentationStyle = UIModalPresentationFullScreen;
+                [[self navigationController] presentModalViewController:game animated:YES];
+                 
             }
             [game setSocket:sock];
-            [[self navigationController] pushViewController:game animated:YES];
         }
         [HUD hide:YES];
     }
@@ -215,7 +218,8 @@
             }
             
         }
-        [[self navigationController] popToViewController:self animated:YES];
+        [[self navigationController] popToViewController:self  animated:YES];
+        [[self navigationController] dismissModalViewControllerAnimated:YES];
         game = nil;
         [server becomeFirstResponder];
         NSLog(@"D/C'd :(");

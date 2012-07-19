@@ -10,7 +10,7 @@
 #import "MCSocket.h"
 #import "MCNBT.h"
 #import "NSData+UserAdditions.h"
-
+#import "MCItem.h"
 
 const NSString* MCEnchantmentLevelMatrix[] = 
 {
@@ -111,14 +111,7 @@ const NSString* MCEnchantmentName(MCEnchantment ench)
     return MCEnchantmentMatrix[ench];
 }
 
-#define canEnchant(value) ( \
-                          (256 <= value && value <= 259) || \
-                          (267 <= value && value <= 279) || \
-                          (283 <= value && value <= 286) || \
-                          (290 <= value && value <= 294) || \
-                          (298 <= value && value <= 317) || \
-                          value == 261 || value == 359 || \
-                          value == 346)
+#define canEnchant(value) (getItem(value,0).enchantable)
 
 @implementation MCSlot
 @synthesize window,socket,oldDelegate,index,slotData;

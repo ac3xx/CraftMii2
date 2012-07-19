@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EA7B410215B78F3600D1803B /* MCItem.m in Sources */ = {isa = PBXBuildFile; fileRef = EA7B410115B78F3600D1803B /* MCItem.m */; };
 		EAD9200B15B6F73D00D4BB39 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200A15B6F73D00D4BB39 /* UIKit.framework */; };
 		EAD9200D15B6F73D00D4BB39 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200C15B6F73D00D4BB39 /* Foundation.framework */; };
 		EAD9200F15B6F73D00D4BB39 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200E15B6F73D00D4BB39 /* CoreGraphics.framework */; };
@@ -59,6 +60,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		EA7B410015B78F3600D1803B /* MCItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCItem.h; sourceTree = "<group>"; };
+		EA7B410115B78F3600D1803B /* MCItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCItem.m; sourceTree = "<group>"; };
 		EAD9200615B6F73D00D4BB39 /* CraftMii2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CraftMii2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAD9200A15B6F73D00D4BB39 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		EAD9200C15B6F73D00D4BB39 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -345,6 +348,8 @@
 				EAD9205215B6F75F00D4BB39 /* MCPacket.m */,
 				EAD9205315B6F75F00D4BB39 /* MCChunk.h */,
 				EAD9205415B6F75F00D4BB39 /* MCChunk.m */,
+				EA7B410015B78F3600D1803B /* MCItem.h */,
+				EA7B410115B78F3600D1803B /* MCItem.m */,
 				EAD920EE15B7504A00D4BB39 /* MCWorld.h */,
 				EAD920EF15B7504B00D4BB39 /* MCWorld.m */,
 				EAD920F315B7510400D4BB39 /* MCBoundingBox.h */,
@@ -556,6 +561,7 @@
 				EAD920E415B7031B00D4BB39 /* MCViewController.m in Sources */,
 				EAD920F115B7504E00D4BB39 /* MCWorld.m in Sources */,
 				EAD920F515B7510600D4BB39 /* MCBoundingBox.m in Sources */,
+				EA7B410215B78F3600D1803B /* MCItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -687,6 +693,7 @@
 				EAD9203115B6F73D00D4BB39 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

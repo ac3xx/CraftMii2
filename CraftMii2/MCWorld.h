@@ -20,4 +20,11 @@
 @property(assign) MCSocket* socket;
 - (MCChunk*)chunkAtCoord:(MCChunkCoord)coord allocate:(BOOL)alloc;
 - (void)removeChunkFromPool:(MCChunk*)chunk;
+- (void)deallocateChunk:(NSDictionary*)infoDict;
+- (void)allocateChunk:(NSDictionary*)infoDict;
+- (void)updateChunk:(NSDictionary*)infoDict;
+- (void)removeChunkFromPool:(MCChunk *)chunk;
+- (MCBlock)getBlock:(MCBlockCoord)coord;
+- (void)setBlock:(MCBlockCoord)coord to:(MCBlock)to;
+- (void)deallocateChunks;
 @end

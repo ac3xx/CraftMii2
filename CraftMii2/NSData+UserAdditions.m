@@ -3,16 +3,14 @@
 #include <openssl/rsa.h>
 #include <openssl/engine.h>
 
+static unsigned char* zbuf = NULL;
 @implementation NSData (libzadditions)
 
 - (NSData *)zlibInflate
 {
 	if ([self length] == 0) return self;
-    
-	unsigned full_length = [self length];
-	unsigned half_length = [self length] / 2;
-    
-	NSMutableData *decompressed = [NSMutableData dataWithLength: full_length + half_length];
+        
+	NSMutableData *decompressed = [[NSMutableData new] autorelease];
 	BOOL done = NO;
 	int status;
     
@@ -24,26 +22,27 @@
 	strm.zfree = Z_NULL;
     
 	if (inflateInit (&strm) != Z_OK) return nil;
-    
+    if (!zbuf)
+        zbuf = malloc(1024*16);
 	while (!done)
 	{
 		// Make sure we have enough room and reset the lengths.
-		if (strm.total_out >= [decompressed length])
-			[decompressed increaseLengthBy: half_length];
-		strm.next_out = [decompressed mutableBytes] + strm.total_out;
-		strm.avail_out = [decompressed length] - strm.total_out;
+		strm.next_out = zbuf;
+		strm.avail_out = 1024*16;
         
 		// Inflate another chunk.
 		status = inflate (&strm, Z_SYNC_FLUSH);
+        [decompressed appendBytes:zbuf length:strm.total_out - [decompressed length]];
 		if (status == Z_STREAM_END) done = YES;
 		else if (status != Z_OK) break;
 	}
-	if (inflateEnd (&strm) != Z_OK) return nil;
-    
+	if (inflateEnd (&strm) != Z_OK) 
+    {
+        return nil;
+    }
 	// Set real length.
 	if (done)
 	{
-		[decompressed setLength: strm.total_out];
 		return [NSData dataWithData: decompressed];
 	}
 	else return nil;
@@ -69,19 +68,19 @@
 	//   Z_DEFAULT_COMPRESSION
     
 	if (deflateInit(&strm, Z_DEFAULT_COMPRESSION) != Z_OK) return nil;
-    
-	NSMutableData *compressed = [NSMutableData dataWithLength:16384];  // 16K chuncks for expansion
+
+    if (!zbuf)
+        zbuf = malloc(1024*16);
+
+	NSMutableData *compressed = [NSMutableData new]; 
     
 	do {
-        
-		if (strm.total_out >= [compressed length])
-			[compressed increaseLengthBy: 16384];
-		
-		strm.next_out = [compressed mutableBytes] + strm.total_out;
-		strm.avail_out = [compressed length] - strm.total_out;
+        		
+		strm.next_out = zbuf;
+		strm.avail_out = 1024*16;
 		
 		deflate(&strm, Z_FINISH);  
-		
+        [compressed appendBytes:zbuf length:strm.total_out - [compressed length]];
 	} while (strm.avail_out == 0);
 	
 	deflateEnd(&strm);

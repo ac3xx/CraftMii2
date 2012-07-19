@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MCWindow.h"
 #import "MCSocket.h"
-
+#import "MCItem.h"
 typedef unsigned int MCEnchantmentLevel;
 
 typedef enum MCEnchantment

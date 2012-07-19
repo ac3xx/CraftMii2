@@ -14,7 +14,10 @@
 #import "NSData+UserAdditions.h"
 #import <objc/runtime.h>
 
-char gzip_signature[] = {0x1F, 0x8B, 0x08};
+char gzip1_signature[] = {0x1F, 0x8B, 0x08};
+char zlib1_signature[] = {0x78, 0xDA};
+char zlib2_signature[] = {0x78, 0x9C};
+char zlib3_signature[] = {0x78, 0x5E};
 NSString* kNBTError = @"kNBTError";
 typedef enum MCNBTTag
 {
@@ -200,10 +203,15 @@ long long l;
 
 +(NSDictionary*)NBTWithData:(NSData*)data
 {
-    if (memcmp([data bytes], gzip_signature, 3) == 0)
+    const unsigned char* db = [data bytes];
+    if (memcmp(db, gzip1_signature, 3) == 0)
 	{
 		data = [data gzipInflate];
 	}
-    return [self NBTWithRawData:data];
+    else if (!(memcmp(db, zlib1_signature, 2) || memcmp(db, zlib2_signature, 2) || memcmp(db, zlib3_signature, 2)))
+	{
+		data = [data zlibInflate];
+	}
+    return [self NBTWithBytes:db andLen:[data length]];
 }
 @end

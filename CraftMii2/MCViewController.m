@@ -11,9 +11,9 @@
 #import "MCPacket.h"
 #import "MCSocket.h"
 #import "MCPlayer.h"
-
-#define YTOUCH_SPEED 0.001f
-#define PTOUCH_SPEED 0.001f
+#define W_HEIGHT 256
+#define YTOUCH_SPEED 0.01f
+#define PTOUCH_SPEED 0.01f
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 // Uniform index.
@@ -31,53 +31,6 @@ enum
     ATTRIB_VERTEX,
     ATTRIB_NORMAL,
     NUM_ATTRIBUTES
-};
-
-GLfloat gCubeVertexData[216] = 
-{
-    // Data layout for each line below is:
-    // positionX, positionY, positionZ,     normalX, normalY, normalZ,
-    0.5f, -0.5f, -0.5f,        1.0f, 0.0f, 0.0f,
-    0.5f, 0.5f, -0.5f,         1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
-    0.5f, 0.5f, -0.5f,          1.0f, 0.0f, 0.0f,
-    0.5f, 0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
-    
-    0.5f, 0.5f, -0.5f,         0.0f, 1.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f,        0.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f,          0.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.5f,          0.0f, 1.0f, 0.0f,
-    -0.5f, 0.5f, -0.5f,        0.0f, 1.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f,         0.0f, 1.0f, 0.0f,
-    
-    -0.5f, 0.5f, -0.5f,        -1.0f, 0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,       -1.0f, 0.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f,         -1.0f, 0.0f, 0.0f,
-    -0.5f, 0.5f, 0.5f,         -1.0f, 0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,       -1.0f, 0.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f,        -1.0f, 0.0f, 0.0f,
-    
-    -0.5f, -0.5f, -0.5f,       0.0f, -1.0f, 0.0f,
-    0.5f, -0.5f, -0.5f,        0.0f, -1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f,        0.0f, -1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f,        0.0f, -1.0f, 0.0f,
-    0.5f, -0.5f, -0.5f,        0.0f, -1.0f, 0.0f,
-    0.5f, -0.5f, 0.5f,         0.0f, -1.0f, 0.0f,
-    
-    0.5f, 0.5f, 0.5f,          0.0f, 0.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f,         0.0f, 0.0f, 1.0f,
-    0.5f, -0.5f, 0.5f,         0.0f, 0.0f, 1.0f,
-    0.5f, -0.5f, 0.5f,         0.0f, 0.0f, 1.0f,
-    -0.5f, 0.5f, 0.5f,         0.0f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.5f,        0.0f, 0.0f, 1.0f,
-    
-    0.5f, -0.5f, -0.5f,        0.0f, 0.0f, -1.0f,
-    -0.5f, -0.5f, -0.5f,       0.0f, 0.0f, -1.0f,
-    0.5f, 0.5f, -0.5f,         0.0f, 0.0f, -1.0f,
-    0.5f, 0.5f, -0.5f,         0.0f, 0.0f, -1.0f,
-    -0.5f, -0.5f, -0.5f,       0.0f, 0.0f, -1.0f,
-    -0.5f, 0.5f, -0.5f,        0.0f, 0.0f, -1.0f
 };
 
 @interface MCViewController () {
@@ -128,7 +81,14 @@ GLfloat gCubeVertexData[216] =
     else if(touchHash2)
     {
         [[socket_ player] setYaw:fmod([[socket_ player] yaw] + RAD2DEG(sAngle), 360.0f)];
-        [[socket_ player] setPitch:fmod([[socket_ player] pitch] + RAD2DEG(mAngle), 90.0f)];
+        float pt = [[socket_ player] pitch] + RAD2DEG(mAngle);
+        if (pt > 89.0f) {
+            pt = 89.0f;
+        }
+        if (pt < -89.0f) {
+            pt = -89.0f;
+        }
+        [[socket_ player] setPitch:pt];
         mAngle = 0;
         sAngle = 0;
     }
@@ -225,6 +185,7 @@ GLfloat gCubeVertexData[216] =
             float x = sinf((sPoint.x - touchLocation.x) * YTOUCH_SPEED) * cosf((sPoint.x - touchLocation.x) * YTOUCH_SPEED);
             float y = sinf((sPoint.y - touchLocation.y) * PTOUCH_SPEED);
             float z = cosf((sPoint.x - touchLocation.x) * YTOUCH_SPEED) * cosf((sPoint.y - touchLocation.y) * PTOUCH_SPEED);
+            sPoint = touchLocation;
             float distance = sqrtf(z*z + x*x);
             sAngle += -atan2(x, z);
             mAngle += -atan2(y, distance);
@@ -327,7 +288,7 @@ GLfloat gCubeVertexData[216] =
         [lifeview setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
         [foodview setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
         [satview_ setHidden:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
-        [[[packet sock] player] setFlying:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
+        //[[[packet sock] player] setFlying:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
     }
     else if (((unsigned char)[packet identifier]) == 0x03) {
         NSLog(@"%@", infoDict);
@@ -371,21 +332,6 @@ GLfloat gCubeVertexData[216] =
     self.effect.light0.enabled = GL_TRUE;
     self.effect.light0.diffuseColor = GLKVector4Make(1.0f, 0.4f, 0.4f, 1.0f);
     
-    glEnable(GL_DEPTH_TEST);
-    
-    glGenVertexArraysOES(1, &_vertexArray);
-    glBindVertexArrayOES(_vertexArray);
-    
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(gCubeVertexData), gCubeVertexData, GL_STATIC_DRAW);
-    
-    glEnableVertexAttribArray(GLKVertexAttribPosition);
-    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(0));
-    glEnableVertexAttribArray(GLKVertexAttribNormal);
-    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
-    
-    glBindVertexArrayOES(0);
 }
 
 - (void)tearDownGL
@@ -417,30 +363,7 @@ GLfloat gCubeVertexData[216] =
 
 - (void)update
 {
-    float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, 0.1f, 100.0f);
-    
-    self.effect.transform.projectionMatrix = projectionMatrix;
-    
-    GLKMatrix4 baseModelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
-    baseModelViewMatrix = GLKMatrix4Rotate(baseModelViewMatrix, _rotation, 0.0f, 1.0f, 0.0f);
-    
-    // Compute the model view matrix for the object rendered with GLKit
-    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -1.5f);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 1.0f, 1.0f, 1.0f);
-    modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
-    
-    self.effect.transform.modelviewMatrix = modelViewMatrix;
-    
-    // Compute the model view matrix for the object rendered with ES2
-    modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, 1.5f);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 1.0f, 1.0f, 1.0f);
-    modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
-    
-    _normalMatrix = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(modelViewMatrix), NULL);
-    
-    _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
-    
+
     _rotation += self.timeSinceLastUpdate * 0.5f;
 }
 
