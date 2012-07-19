@@ -11,12 +11,12 @@
 #import "MCEntity.h"
 #import "MCSlot.h"
 #import "MCSocketDelegate.h"
+#import "MCPlayer.h"
 @class MCBuffer;
 @class MCPacket;
 @class MCSlot;
 @class MCMetadata;
 @class MCChunk;
-@class MCPlayer;
 @class MCWorld;
 @interface MCSocket : NSObject <NSStreamDelegate>
 {
@@ -51,6 +51,7 @@
 @property(assign) unsigned int ticks;
 @property(assign) int identifier;
 @property(retain) MCWorld* world;
+@property(assign) BOOL isConnected;
 - (MCSocket*)initWithServer:(NSString*)iserver andAuth:(MCAuth*)iauth;
 - (void)metadata:(MCMetadata*)metadata hasFinishedParsing:(NSArray*)infoArray;
 - (void)slot:(MCSlot*)slot hasFinishedParsing:(NSDictionary*)infoDict;

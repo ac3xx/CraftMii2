@@ -10,6 +10,7 @@
 		EA7B410215B78F3600D1803B /* MCItem.m in Sources */ = {isa = PBXBuildFile; fileRef = EA7B410115B78F3600D1803B /* MCItem.m */; };
 		EA7B410515B7D71C00D1803B /* joypad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = EA7B410415B7D71C00D1803B /* joypad@2x.png */; };
 		EA7B410715B7D7B100D1803B /* joypadCap@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = EA7B410615B7D7B100D1803B /* joypadCap@2x.png */; };
+		EA7B410915B8519D00D1803B /* terrain.png in Resources */ = {isa = PBXBuildFile; fileRef = EA7B410815B8519C00D1803B /* terrain.png */; };
 		EAD9200B15B6F73D00D4BB39 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200A15B6F73D00D4BB39 /* UIKit.framework */; };
 		EAD9200D15B6F73D00D4BB39 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200C15B6F73D00D4BB39 /* Foundation.framework */; };
 		EAD9200F15B6F73D00D4BB39 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200E15B6F73D00D4BB39 /* CoreGraphics.framework */; };
@@ -66,6 +67,7 @@
 		EA7B410115B78F3600D1803B /* MCItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCItem.m; sourceTree = "<group>"; };
 		EA7B410415B7D71C00D1803B /* joypad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "joypad@2x.png"; sourceTree = "<group>"; };
 		EA7B410615B7D7B100D1803B /* joypadCap@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "joypadCap@2x.png"; sourceTree = "<group>"; };
+		EA7B410815B8519C00D1803B /* terrain.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = terrain.png; sourceTree = "<group>"; };
 		EAD9200615B6F73D00D4BB39 /* CraftMii2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CraftMii2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAD9200A15B6F73D00D4BB39 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		EAD9200C15B6F73D00D4BB39 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -301,6 +303,7 @@
 				EAD9202415B6F73D00D4BB39 /* MCViewController.h */,
 				EAD9202715B6F73D00D4BB39 /* MCViewController_iPhone.xib */,
 				EAD9202A15B6F73D00D4BB39 /* MCViewController_iPad.xib */,
+				EA7B410815B8519C00D1803B /* terrain.png */,
 				EAD9201515B6F73D00D4BB39 /* Supporting Files */,
 			);
 			path = CraftMii2;
@@ -526,6 +529,7 @@
 				EAD920ED15B720E700D4BB39 /* joypadCap.png in Resources */,
 				EA7B410515B7D71C00D1803B /* joypad@2x.png in Resources */,
 				EA7B410715B7D7B100D1803B /* joypadCap@2x.png in Resources */,
+				EA7B410915B8519D00D1803B /* terrain.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -656,6 +660,7 @@
 				"GCC_THUMB_SUPPORT[arch=armv6]" = "";
 				HEADER_SEARCH_PATHS = "\"$(SRCROOT)\"";
 				INFOPLIST_FILE = "CraftMii2/CraftMii2-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
@@ -673,6 +678,7 @@
 				"GCC_THUMB_SUPPORT[arch=armv6]" = "";
 				HEADER_SEARCH_PATHS = "\"$(SRCROOT)\"";
 				INFOPLIST_FILE = "CraftMii2/CraftMii2-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",

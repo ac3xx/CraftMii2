@@ -141,10 +141,13 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
              nil];
              */
             if ([[infoDict objectForKey:@"PacketType"] isEqualToString:@"ChunkUpdate"]) {
-                NSLog(@"%@", infoDict);
                 short primary = [[infoDict objectForKey:@"PrimaryBit"] shortValue];
                 short add = [[infoDict objectForKey:@"AddBit"] shortValue];
                 NSData* dt = [[infoDict objectForKey:@"ChunkData"] zlibInflate];
+                if (!dt) {
+                    NSLog(@"== Error. Well, Fuck. ==");
+                    return;
+                }
                 const char* db = [dt bytes];
                 BOOL guc = [[infoDict objectForKey:@"GroundUpContinuous"] boolValue];
                 if(guc)
@@ -162,26 +165,28 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                     if ((primary >> i ) & 0x1) {
                         sections_bitmask |= 1 << i;
                         if (!(sections[i])) {
-                            sections[i] = (MCSection*) malloc(sizeof(MCSection));
+                            [self allocateSection:i];
                         }
                         if ((add >> i ) & 0x1) {
                             if (rpoint+sizeof(MCSection) > [dt length]) {
-                                NSLog(@"[Critical] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.");
+                                NSLog(@"[Critical] [%s:%d] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.", __FILE__, __LINE__);
                                 dispatch_async(dispatch_get_main_queue(), ^(void){
                                     [[world socket] disconnectWithReason:@"Chunk Error"];                 
                                     [infoDict release];
                                 });
+                                NSLog(@"%d - %d - %ld", rpoint, [dt length], sizeof(biomes));
                                 return;
                             }
                             memcpy(sections[i], (char*)(int)[dt bytes]+(rpoint), sizeof(MCSection));
                             rpoint += sizeof(MCSection);
                         } else {
                             if (rpoint+sizeof(MCSection)-2048 > [dt length]) {
-                                NSLog(@"[Critical] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.");
+                                NSLog(@"[Critical] [%s:%d] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.", __FILE__, __LINE__);
                                 dispatch_async(dispatch_get_main_queue(), ^(void){
                                     [[world socket] disconnectWithReason:@"Chunk Error"];                 
                                     [infoDict release];
                                 });
+                                NSLog(@"%d - %d - %ld", rpoint, [dt length], sizeof(biomes));
                                 return;
                             }
                             bzero(sections[i]->addarray, 2048);
@@ -193,26 +198,28 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                 if(guc)
                 {
                     if (rpoint+sizeof(biomes) > [dt length]) {
-                        NSLog(@"[Critical] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.");
+                        NSLog(@"[Critical] [%s:%d] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.", __FILE__, __LINE__);
                         dispatch_async(dispatch_get_main_queue(), ^(void){
                             [[world socket] disconnectWithReason:@"Chunk Error"];                 
                             [infoDict release];
                         });
+                        NSLog(@"%d - %d - %ld", rpoint, [dt length], sizeof(biomes));
                         return;
                     }
                     memcpy(biomes, db+rpoint, sizeof(biomes));
                     rpoint += sizeof(biomes);
                 }
                 if (rpoint != [dt length]) {
-                    NSLog(@"[Critical] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.");
+                    NSLog(@"[Critical] [%s:%d] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.", __FILE__, __LINE__);
                     dispatch_async(dispatch_get_main_queue(), ^(void){
                         [[world socket] disconnectWithReason:@"Chunk Error"];                 
                         [infoDict release];
                     });
+                    NSLog(@"%d - %d - %ld", rpoint, [dt length], sizeof(biomes));
                     return;
                 }
-                NSLog(@"%d - %d - %ld", rpoint, [dt length], sizeof(biomes));
                 [[world socket] chunkDidUpdate:self];
+                [self genVertexes];
                 [infoDict release];
             } else if ([[infoDict objectForKey:@"PacketType"] isEqualToString:@"MultiBlockChange"]) {
                 NSData* dt = [[infoDict objectForKey:@"Records"] zlibInflate];
@@ -227,14 +234,27 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                     char   xcoord = ( parse & 0xF0000000 ) >> 28;
                     char yrelcoord = abs(ycoord) % 16;
                     char ysection = ycoord / 16;
-                    MCSection* sc = sections[ysection];
+                    MCSection* sc = [self allocateSection:ysection];
                     MCSetBlockInSection(sc, MCBlockCoordMake(xcoord, yrelcoord, zcoord), ((MCBlock){blockid, metadata, 0, 0}));
-                    NSLog(@"MBC");
                     rpoint += 4;
                 }
             }
         }
     });
+}
+    
+-(MCSection*)allocateSection:(char)index
+{
+    if (index > 16) {
+        return NULL;
+    }
+    if (!((sections_bitmask >> index) & 0x1)) {
+        return sections[index];
+    }
+    sections_bitmask |= 1 << index;
+    sections[index] = malloc(sizeof(MCSection));
+    bzero(sections[index], sizeof(MCSection));
+    return sections[index];
 }
 
 -(MCSection*)sectionForBlockCoord:(MCBlockCoord)coord
@@ -243,7 +263,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
     if (y > 16) {
         return NULL;
     }
-    return sections[entityCoordToChunkSectionCoord(coord).y];
+    return sections[y];
 }
 
 -(MCSection*)sectionForYRel:(short)y

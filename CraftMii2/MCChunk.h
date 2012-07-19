@@ -106,6 +106,7 @@ extern MCBlock MCGetBlockInSection(MCSection* section, MCBlockCoord relativecoor
     MCSection* sections[16];
     char biomes[16*16];
     MCWorld* world;
+    GLbyte* vertexes;
 }
 @property(assign) int x;
 @property(assign) int z;
@@ -113,5 +114,8 @@ extern MCBlock MCGetBlockInSection(MCSection* section, MCBlockCoord relativecoor
 -(void)updateChunk:(NSDictionary*)infoDict;
 -(MCSection*)sectionForBlockCoord:(MCBlockCoord)coord;
 -(MCSection*)sectionForYRel:(short)y;
+-(MCSection*)allocateSection:(char)index;
+-(void)genVertexes;
+-(void)destroyVertexes;
 @end
 MCBlock getBlock(MCBlockCoord coord, MCSocket* socket);

@@ -45,28 +45,30 @@ long long l;
 }
 -(void)sendToSocket:(MCSocket *)socket
 {
-    [[socket outputBuffer] writeByte:(uint8_t)0x0D];
-    MCType32 a;
-    MCType64 b;
-    b.d = x;
-    b.l = OSSwapInt64(b.l);
-    [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
-    b.d = y;
-    b.l = OSSwapInt64(b.l);
-    [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
-    b.d = stance;
-    b.l = OSSwapInt64(b.l);
-    [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
-    b.d = z;
-    b.l = OSSwapInt64(b.l);
-    [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
-    a.f = yaw;
-    a.i = OSSwapInt32(a.i);
-    [[socket outputBuffer] write:(uint_fast8_t*)&(a.i) length:4];
-    a.f = pitch;
-    a.i = OSSwapInt32(a.i);
-    [[socket outputBuffer] write:(uint_fast8_t*)&(a.i) length:4];
-    [[socket outputBuffer] writeByte:(uint8_t)onGround];
+    if ([socket isConnected]) {
+        [[socket outputBuffer] writeByte:(uint8_t)0x0D];
+        MCType32 a;
+        MCType64 b;
+        b.d = x;
+        b.l = OSSwapInt64(b.l);
+        [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
+        b.d = y;
+        b.l = OSSwapInt64(b.l);
+        [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
+        b.d = stance;
+        b.l = OSSwapInt64(b.l);
+        [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
+        b.d = z;
+        b.l = OSSwapInt64(b.l);
+        [[socket outputBuffer] write:(uint_fast8_t*)&(b.l) length:8];
+        a.f = yaw;
+        a.i = OSSwapInt32(a.i);
+        [[socket outputBuffer] write:(uint_fast8_t*)&(a.i) length:4];
+        a.f = pitch;
+        a.i = OSSwapInt32(a.i);
+        [[socket outputBuffer] write:(uint_fast8_t*)&(a.i) length:4];
+        [[socket outputBuffer] writeByte:(uint8_t)onGround];
+    }
 }
 -(void)dealloc
 {

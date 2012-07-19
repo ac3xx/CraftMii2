@@ -360,6 +360,7 @@ typedef struct MCItem
     BOOL                diggable;
     BOOL                blockActivatable;
     BOOL                safe;
+    float               slipperiness;
     float               hardness;
     BOOL                enchantable;
     MCMaterial          material;

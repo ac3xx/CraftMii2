@@ -25,7 +25,7 @@
 static int currentIdentifier = 0;
 
 @implementation MCSocket
-@synthesize inputStream, outputStream, auth, player, server, delegate, buffer, dataBuffer, metadataArea, outputBuffer, ticks, identifier, world;
+@synthesize inputStream, outputStream, auth, player, server, delegate, buffer, dataBuffer, metadataArea, outputBuffer, ticks, identifier, world, isConnected;
 -(MCSocket*)initWithServer:(NSString*)iserver andAuth:(MCAuth*)iauth
 {
     NSLog(@"ID: %d", currentIdentifier);
@@ -157,6 +157,37 @@ static int currentIdentifier = 0;
 }
 - (void)packet:(MCPacket*)packet gotParsed:(NSDictionary*)infoDict
 {
+    [infoDict retain];
+    if ([packet identifier] == 0x0D)
+    {
+        [[self player] setX:          [[infoDict objectForKey:@"X"] doubleValue]];
+        [[self player] setY:          [[infoDict objectForKey:@"Y"] doubleValue]];
+        [[self player] setZ:          [[infoDict objectForKey:@"Z"] doubleValue]];
+        [[self player] setStance:     [[infoDict objectForKey:@"Stance"] doubleValue]];
+        [[self player] setYaw:        [[infoDict objectForKey:@"Yaw"] floatValue]];
+        [[self player] setPitch:      [[infoDict objectForKey:@"Pitch"] floatValue]];
+        [[self player] setOnGround:   [[infoDict objectForKey:@"On Ground"] boolValue]];
+        isConnected = YES;
+    }
+    else if ([packet identifier] == 0xFF) {
+        [outputStream setDelegate:nil];
+        [inputStream setDelegate:nil];
+        [outputStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+                                forMode:NSDefaultRunLoopMode];
+        [inputStream removeFromRunLoop:[NSRunLoop currentRunLoop]
+                               forMode:NSDefaultRunLoopMode];
+        [inputStream close];
+        [outputStream close];
+        self.outputStream = nil;
+        self.inputStream = nil;
+        isInUse = NO;
+        [self autorelease];
+    } else if ([packet identifier] == 0x01)
+    {
+        player = (MCPlayer*)[MCPlayer entityWithIdentifier:[[infoDict objectForKey:@"EntityID"] intValue]];
+        [player setGamemode:[infoDict objectForKey:@"GameMode"]];
+    }
+
     if ([delegate respondsToSelector:@selector(packet:gotParsed:)]) { 
             dispatch_async(dispatch_get_main_queue(), ^{
                 /*NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -199,24 +230,7 @@ static int currentIdentifier = 0;
                      [NSNumber numberWithChar:*(char*)(data+10)], @"BlockMetadata",
                      @"BlockChange", @"PacketType",
                      */
-                    NSLog(@"%@", infoDict);
                     [world setBlock:MCBlockCoordMake([[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Y"] charValue], [[infoDict objectForKey:@"Z"] intValue]) to:(MCBlock){[[infoDict objectForKey:@"BlockType"] shortValue], [[infoDict objectForKey:@"BlockMetadata"] charValue], 0,0}];
-                }
-                else if ([packet identifier] == 0x0D)
-                {
-                    [[self player] setX:          [[infoDict objectForKey:@"X"] doubleValue]];
-                    [[self player] setY:          [[infoDict objectForKey:@"Y"] doubleValue]];
-                    [[self player] setZ:          [[infoDict objectForKey:@"Z"] doubleValue]];
-                    [[self player] setStance:     [[infoDict objectForKey:@"Stance"] doubleValue]];
-                    [[self player] setYaw:        [[infoDict objectForKey:@"Yaw"] floatValue]];
-                    [[self player] setPitch:      [[infoDict objectForKey:@"Pitch"] floatValue]];
-                    [[self player] setOnGround:   [[infoDict objectForKey:@"On Ground"] boolValue]];
-                    isConnected = YES;
-                }
-                else if ([packet identifier] == 0x01)
-                {
-                    player = (id) [MCPlayer entityWithIdentifier:[[infoDict objectForKey:@"EntityID"] intValue]];
-                    [player setGamemode:[infoDict objectForKey:@"GameMode"]];
                 }
                 else if ([packet identifier] == 0x09)
                 {
@@ -236,20 +250,10 @@ static int currentIdentifier = 0;
                     [[MCPingPacket packetWithInfo:infoDict] sendToSocket:self];
                 }
                 [delegate packet:packet gotParsed:infoDict];
+                [infoDict release];
             });
-        if ([packet identifier] == 0xFF) {
-            [outputStream setDelegate:nil];
-            [inputStream setDelegate:nil];
-            [outputStream removeFromRunLoop:[NSRunLoop currentRunLoop]
-                                    forMode:NSDefaultRunLoopMode];
-            [inputStream removeFromRunLoop:[NSRunLoop currentRunLoop]
-                                   forMode:NSDefaultRunLoopMode];
-            [inputStream close];
-            [outputStream close];
-            self.outputStream = nil;
-            self.inputStream = nil;
-            isInUse = NO;
-        }
+    } else {
+        [infoDict release];
     }
 }
 - (void)disconnect
@@ -316,6 +320,8 @@ static int currentIdentifier = 0;
 }
 -(void)dealloc
 {
+    NSLog(@"== BAIL ==");
+    currentIdentifier--;
     free((void*)[self dataBuffer]);
     free((void*)[self metadataArea]);
     [self setBuffer:nil];

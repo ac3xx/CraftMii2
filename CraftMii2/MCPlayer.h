@@ -15,15 +15,21 @@
  #define PLAYER_HEIGHT 1.62
  #define PLAYER_CROUCHED_HEIGHT 1.54
 */
-
+typedef struct MCVector {
+    float x;
+    float y;
+    float z;
+} MCVector;
 @interface MCPlayer : MCEntity
 {
     BOOL sprinting;
     BOOL crouched;
     BOOL flying;
+    
 }
 @property(assign) BOOL crouched;
 @property(assign) BOOL sprinting;
 @property(assign) BOOL flying;
 - (double)stance;
+- (void)onServerTick;
 @end

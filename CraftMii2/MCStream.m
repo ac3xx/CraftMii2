@@ -132,7 +132,11 @@
 }
 -(void)dealloc
 {
-    free(readbuf);
+    @synchronized(self)
+    {
+        free(readbuf);
+        readbuf = nil;
+    }
     [self setOrigStream:nil];
     [self setDelegate:nil];
     [super dealloc];

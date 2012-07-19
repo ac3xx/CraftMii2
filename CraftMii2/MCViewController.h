@@ -37,6 +37,7 @@
     UIImageView* joypadCap;
     UIImageView* joypad;
     BOOL joypadMoving;
+    GLuint textures[1];
 }
 @property(retain)MCSocket* socket;
 

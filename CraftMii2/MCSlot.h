@@ -110,7 +110,7 @@ extern const NSString* MCEnchantmentName(MCEnchantment ench);
 }
 @property(retain) MCWindow* window;
 @property(assign) int index;
-@property(retain) MCSocket* socket;
+@property(assign) MCSocket* socket;
 @property(retain) NSMutableDictionary* slotData;
 @property(assign) id oldDelegate;
 +(MCSlot*)slotWithWindow:(MCWindow*)awindow atPosition:(short)aindex withSocket:(MCSocket*)asocket;

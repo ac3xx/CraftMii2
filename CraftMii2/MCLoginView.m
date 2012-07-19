@@ -190,11 +190,11 @@
         {
             if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
                 game = [[[MCViewController alloc] initWithNibName:@"MCViewController_iPhone" bundle:nil] autorelease];
-                [[self navigationController] presentModalViewController:game animated:YES];
+                [[self navigationController] presentModalViewController:game animated:NO];
             } else {
                 game = [[[MCViewController alloc] initWithNibName:@"MCViewController_iPad" bundle:nil] autorelease];
                 //[[self navigationController] splitViewController].modalPresentationStyle = UIModalPresentationFullScreen;
-                [[self navigationController] presentModalViewController:game animated:YES];
+                [[self navigationController] presentModalViewController:game animated:NO];
                  
             }
             [game setSocket:sock];
@@ -218,9 +218,10 @@
             }
             
         }
-        [[self navigationController] popToViewController:self  animated:YES];
-        [[self navigationController] dismissModalViewControllerAnimated:YES];
+        [[self navigationController] popToViewController:self  animated:NO];
+        [[self navigationController] dismissModalViewControllerAnimated:NO];
         game = nil;
+        sock = nil;
         [server becomeFirstResponder];
         NSLog(@"D/C'd :(");
     }
@@ -235,9 +236,9 @@
 {
     auth = [MCAuth authWithUsername:[user text] andPassword:[pass text]];
     [auth login];
-    sock = [[MCSocket alloc] initWithServer:[server text] andAuth:auth];
+    sock = [[[MCSocket alloc] initWithServer:[server text] andAuth:auth] autorelease];
     [sock setDelegate:self];
-    [sock performSelectorOnMainThread:@selector(connect:) withObject:[NSNull null] waitUntilDone:NO];
+    [sock connect];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField

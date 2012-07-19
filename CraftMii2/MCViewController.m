@@ -11,7 +11,9 @@
 #import "MCPacket.h"
 #import "MCSocket.h"
 #import "MCPlayer.h"
-#define W_HEIGHT 256
+#import "MCWorld.h"
+#define VCHUNKS   16
+#define VSECTIONS 16
 #define YTOUCH_SPEED 0.01f
 #define PTOUCH_SPEED 0.01f
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
@@ -63,6 +65,7 @@ enum
 
 - (void)dealloc
 {
+    [socket release];
     [_context release];
     [_effect release];
     [super dealloc];
@@ -152,7 +155,7 @@ enum
     for (UITouch *touch in allTouches) {
         CGPoint touchLocation = [touch locationInView:self.view];
         CGRect sz = [[UIScreen mainScreen] bounds];
-        if (CGRectContainsPoint(CGRectMake(0, sz.size.width/3.0f, sz.size.height/2.0f, sz.size.width/1.5f), touchLocation) && !joypadMoving) {
+        if (CGRectContainsPoint(CGRectMake(0, sz.size.width-200.0f, 200.0f, 200.0f), touchLocation) && !joypadMoving) {
             NSLog(@"Valid!");
             joypadMoving = YES;
             touchHash = [touch hash];
@@ -161,6 +164,7 @@ enum
             sPoint = touchLocation;
         }
     }
+    [self touchesMoved:touches withEvent:event];
 }
 
 
@@ -327,11 +331,42 @@ enum
     [EAGLContext setCurrentContext:self.context];
     
     [self loadShaders];
+    glGenTextures(1, &textures[0]);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"terrain" ofType:@"png"];
+    NSData *texData = [[NSData alloc] initWithContentsOfFile:path];
+    UIImage *image = [[UIImage alloc] initWithData:texData];
+    if (image == nil)
+    {
+        NSLog(@"Well, fuck.");
+        return;
+    }
+    GLuint width = CGImageGetWidth(image.CGImage)/16;
+    GLuint height = CGImageGetHeight(image.CGImage)*16;
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    void *imageData = malloc( height * width * 4 );
+    CGContextRef context = CGBitmapContextCreate( imageData, width, height, 8, 4 * width, colorSpace, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big );
+    CGColorSpaceRelease( colorSpace );
+    CGContextClearRect( context, CGRectMake( 0, 0, width, height ) );
+    CGContextTranslateCTM( context, 0, height - height );
+    CGContextDrawImage( context, CGRectMake( 0, 0, width, height ), image.CGImage );
     
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+    
+    CGContextRelease(context);
+    
+    free(imageData);
+    [image release];
+    [texData release];
+    
+
     self.effect = [[[GLKBaseEffect alloc] init] autorelease];
     self.effect.light0.enabled = GL_TRUE;
     self.effect.light0.diffuseColor = GLKVector4Make(1.0f, 0.4f, 0.4f, 1.0f);
-    
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_SRC_COLOR);
+    glEnable(GL_CULL_FACE);
 }
 
 - (void)tearDownGL
@@ -361,9 +396,53 @@ enum
     [self.navigationController setNavigationBarHidden:NO animated:NO];
 }
 
+struct MCVertex
+{
+char x;
+char y;
+char z;
+char block;
+};
+
 - (void)update
 {
-
+    struct MCVertex* vertexes=malloc(VCHUNKS * 16 * VSECTIONS * 16 * 6 * 6);
+    int i = 0;
+    bzero(vertexes, sizeof(vertexes));
+    for (int chunk = 0; chunk < VCHUNKS; chunk++) {
+        for (int x = 0; x < 16; x++) {
+            for (int y = 0; y < VSECTIONS*16; y++) {
+                for (int z = 0; z < 16; z++) {
+                    int rx = chunk * x + [[socket player] x];
+                    int ry = y;
+                    int rz = chunk * z + [[socket player] z];
+                    MCBlock blk = [[socket world] getBlock:MCBlockCoordMake(rx, ry, rz)];
+                    if (blk.typedata == 0) {
+                        continue;
+                    }
+                    /*
+                     NegX
+                     */
+                    vertexes[i++] = (struct MCVertex) {rx, ry, rz, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx, ry, rz+1, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx, ry+1, rz, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx, ry+1, rz, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx, ry, rz+1, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx, ry+1, rz+1, blk.typedata & 0xFF};
+                    /*
+                     PosX
+                     */
+                    vertexes[i++] = (struct MCVertex) {rx+1, ry, rz, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx+1, ry, rz+1, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz+1, blk.typedata & 0xFF};
+                    vertexes[i++] = (struct MCVertex) {rx+1, ry, rz+1, blk.typedata & 0xFF};
+                }
+            }
+        }
+    }
+    free(vertexes);
     _rotation += self.timeSinceLastUpdate * 0.5f;
 }
 
