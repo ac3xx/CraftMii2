@@ -8,7 +8,7 @@
 
 #import "MCColor.h"
 
-@implementation MCColor
+@implementation UIColor (MCColor)
 +(UIColor*)colorWithCode:(char)code
 {
     switch (code) {

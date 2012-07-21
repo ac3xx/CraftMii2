@@ -11,6 +11,8 @@
 		EA7B410515B7D71C00D1803B /* joypad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = EA7B410415B7D71C00D1803B /* joypad@2x.png */; };
 		EA7B410715B7D7B100D1803B /* joypadCap@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = EA7B410615B7D7B100D1803B /* joypadCap@2x.png */; };
 		EA7B410915B8519D00D1803B /* terrain.png in Resources */ = {isa = PBXBuildFile; fileRef = EA7B410815B8519C00D1803B /* terrain.png */; };
+		EA8AB79215BB4F3200CE4DA6 /* NSString+Minecraft.m in Sources */ = {isa = PBXBuildFile; fileRef = EA8AB79115BB4F3200CE4DA6 /* NSString+Minecraft.m */; };
+		EA8AB79415BB570600CE4DA6 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA8AB79315BB570600CE4DA6 /* CoreText.framework */; };
 		EAD9200B15B6F73D00D4BB39 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200A15B6F73D00D4BB39 /* UIKit.framework */; };
 		EAD9200D15B6F73D00D4BB39 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200C15B6F73D00D4BB39 /* Foundation.framework */; };
 		EAD9200F15B6F73D00D4BB39 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EAD9200E15B6F73D00D4BB39 /* CoreGraphics.framework */; };
@@ -45,7 +47,6 @@
 		EAD9207B15B6F75F00D4BB39 /* MCStream.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9205A15B6F75F00D4BB39 /* MCStream.m */; };
 		EAD9207C15B6F75F00D4BB39 /* MCSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9205C15B6F75F00D4BB39 /* MCSocket.m */; };
 		EAD9207D15B6F75F00D4BB39 /* MCFakePacket.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9205E15B6F75F00D4BB39 /* MCFakePacket.m */; };
-		EAD9207E15B6F75F00D4BB39 /* MCString.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9206115B6F75F00D4BB39 /* MCString.m */; };
 		EAD9207F15B6F75F00D4BB39 /* MCWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9206315B6F75F00D4BB39 /* MCWindow.m */; };
 		EAD9208015B6F75F00D4BB39 /* NSData+UserAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9206515B6F75F00D4BB39 /* NSData+UserAdditions.m */; };
 		EAD9208115B6F75F00D4BB39 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = EAD9206715B6F75F00D4BB39 /* MBProgressHUD.m */; };
@@ -68,6 +69,9 @@
 		EA7B410415B7D71C00D1803B /* joypad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "joypad@2x.png"; sourceTree = "<group>"; };
 		EA7B410615B7D7B100D1803B /* joypadCap@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "joypadCap@2x.png"; sourceTree = "<group>"; };
 		EA7B410815B8519C00D1803B /* terrain.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = terrain.png; sourceTree = "<group>"; };
+		EA8AB79015BB4F3200CE4DA6 /* NSString+Minecraft.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Minecraft.h"; sourceTree = "<group>"; };
+		EA8AB79115BB4F3200CE4DA6 /* NSString+Minecraft.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Minecraft.m"; sourceTree = "<group>"; };
+		EA8AB79315BB570600CE4DA6 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		EAD9200615B6F73D00D4BB39 /* CraftMii2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CraftMii2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAD9200A15B6F73D00D4BB39 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		EAD9200C15B6F73D00D4BB39 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -130,8 +134,6 @@
 		EAD9205D15B6F75F00D4BB39 /* MCFakePacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCFakePacket.h; sourceTree = "<group>"; };
 		EAD9205E15B6F75F00D4BB39 /* MCFakePacket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCFakePacket.m; sourceTree = "<group>"; };
 		EAD9205F15B6F75F00D4BB39 /* MCSocketDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCSocketDelegate.h; sourceTree = "<group>"; };
-		EAD9206015B6F75F00D4BB39 /* MCString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCString.h; sourceTree = "<group>"; };
-		EAD9206115B6F75F00D4BB39 /* MCString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCString.m; sourceTree = "<group>"; };
 		EAD9206215B6F75F00D4BB39 /* MCWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCWindow.h; sourceTree = "<group>"; };
 		EAD9206315B6F75F00D4BB39 /* MCWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCWindow.m; sourceTree = "<group>"; };
 		EAD9206415B6F75F00D4BB39 /* NSData+UserAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+UserAdditions.h"; sourceTree = "<group>"; };
@@ -235,6 +237,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA8AB79415BB570600CE4DA6 /* CoreText.framework in Frameworks */,
 				EAD9209215B6FAE700D4BB39 /* libz.dylib in Frameworks */,
 				EAD9200B15B6F73D00D4BB39 /* UIKit.framework in Frameworks */,
 				EAD9200D15B6F73D00D4BB39 /* Foundation.framework in Frameworks */,
@@ -252,14 +255,15 @@
 		EAD91FFB15B6F73C00D4BB39 = {
 			isa = PBXGroup;
 			children = (
+				EA8AB79315BB570600CE4DA6 /* CoreText.framework */,
 				EAD9209715B6FB1400D4BB39 /* openssl */,
 				EAD9209315B6FAF500D4BB39 /* libcrypto.a */,
 				EAD9209415B6FAF500D4BB39 /* libssl.a */,
 				EAD9209115B6FAE700D4BB39 /* libz.dylib */,
-				EAD920EA15B720E600D4BB39 /* joypad.png */,
 				EAD920EB15B720E700D4BB39 /* joypadCap.png */,
-				EA7B410415B7D71C00D1803B /* joypad@2x.png */,
 				EA7B410615B7D7B100D1803B /* joypadCap@2x.png */,
+				EAD920EA15B720E600D4BB39 /* joypad.png */,
+				EA7B410415B7D71C00D1803B /* joypad@2x.png */,
 				EAD9201415B6F73D00D4BB39 /* CraftMii2 */,
 				EAD9200915B6F73D00D4BB39 /* Frameworks */,
 				EAD9200715B6F73D00D4BB39 /* Products */,
@@ -374,8 +378,8 @@
 				EAD9205D15B6F75F00D4BB39 /* MCFakePacket.h */,
 				EAD9205E15B6F75F00D4BB39 /* MCFakePacket.m */,
 				EAD9205F15B6F75F00D4BB39 /* MCSocketDelegate.h */,
-				EAD9206015B6F75F00D4BB39 /* MCString.h */,
-				EAD9206115B6F75F00D4BB39 /* MCString.m */,
+				EA8AB79015BB4F3200CE4DA6 /* NSString+Minecraft.h */,
+				EA8AB79115BB4F3200CE4DA6 /* NSString+Minecraft.m */,
 				EAD9206215B6F75F00D4BB39 /* MCWindow.h */,
 				EAD9206315B6F75F00D4BB39 /* MCWindow.m */,
 				EAD9206415B6F75F00D4BB39 /* NSData+UserAdditions.h */,
@@ -564,7 +568,6 @@
 				EAD9207B15B6F75F00D4BB39 /* MCStream.m in Sources */,
 				EAD9207C15B6F75F00D4BB39 /* MCSocket.m in Sources */,
 				EAD9207D15B6F75F00D4BB39 /* MCFakePacket.m in Sources */,
-				EAD9207E15B6F75F00D4BB39 /* MCString.m in Sources */,
 				EAD9207F15B6F75F00D4BB39 /* MCWindow.m in Sources */,
 				EAD9208015B6F75F00D4BB39 /* NSData+UserAdditions.m in Sources */,
 				EAD9208115B6F75F00D4BB39 /* MBProgressHUD.m in Sources */,
@@ -574,6 +577,7 @@
 				EAD920F115B7504E00D4BB39 /* MCWorld.m in Sources */,
 				EAD920F515B7510600D4BB39 /* MCBoundingBox.m in Sources */,
 				EA7B410215B78F3600D1803B /* MCItem.m in Sources */,
+				EA8AB79215BB4F3200CE4DA6 /* NSString+Minecraft.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -612,7 +616,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Anna Segalla (5TFRY8984J)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -627,6 +632,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "4DFBA45F-48AA-482E-B72C-3AA7C89A0310";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -637,6 +644,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -646,6 +654,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -655,6 +664,7 @@
 		EAD9203015B6F73D00D4BB39 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer: Anna Segalla (5TFRY8984J)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "CraftMii2/CraftMii2-Prefix.pch";
 				"GCC_THUMB_SUPPORT[arch=armv6]" = "";
@@ -666,6 +676,7 @@
 					"\"$(SRCROOT)\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "4DFBA45F-48AA-482E-B72C-3AA7C89A0310";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -673,6 +684,7 @@
 		EAD9203115B6F73D00D4BB39 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer: Anna Segalla (5TFRY8984J)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "CraftMii2/CraftMii2-Prefix.pch";
 				"GCC_THUMB_SUPPORT[arch=armv6]" = "";
@@ -684,6 +696,7 @@
 					"\"$(SRCROOT)\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "4DFBA45F-48AA-482E-B72C-3AA7C89A0310";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

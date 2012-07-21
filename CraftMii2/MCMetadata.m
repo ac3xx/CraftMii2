@@ -23,7 +23,7 @@
     [aentity setMetadata:ret];
     [ret setStream:[asocket inputStream]];
     [ret setOldDelegate:[[asocket inputStream] delegate]];
-    [((MCMetadata*)ret) setMetadata:[NSMutableArray new]];
+    [((MCMetadata*)ret) setMetadata:[[NSMutableArray new] autorelease]];
     [ret initValues];
     [[asocket inputStream] setDelegate:ret];
     return ret;

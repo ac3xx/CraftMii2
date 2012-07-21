@@ -14,7 +14,9 @@
 {
     if ((self = [super init]))
     {
-        [self setChunkPool:[[NSMutableDictionary new] autorelease]];
+        NSMutableDictionary* poolRef = (id)CFDictionaryCreateMutable(nil, 0, nil, &kCFTypeDictionaryValueCallBacks);
+        [self setChunkPool:poolRef];
+        [poolRef release];
     }
     return self;
 }
@@ -22,17 +24,19 @@
 
 - (MCChunk*)chunkAtCoord:(MCChunkCoord)coord allocate:(BOOL)alloc
 {
-    NSString* ckeid = [NSString stringWithFormat:@"%d-%d", coord.x, coord.z];
-    MCChunk* chunk = [chunkPool objectForKey:ckeid];
-    if (chunk || !alloc) {
-        return chunk;
+    @synchronized(self)
+    {
+        MCChunk* chunk = [chunkPool objectForKey:(id)((coord.x << 16) | coord.z)];
+        if (chunk || !alloc) {
+            return chunk;
+        }
+        chunk = [MCChunk new];
+        [chunk setX:coord.x];
+        [chunk setZ:coord.z];
+        [chunk setWorld:self];
+        CFDictionarySetValue((CFMutableDictionaryRef)chunkPool, (const void*)((coord.x << 16) | coord.z), chunk);
+        return [chunk autorelease];
     }
-    chunk = [MCChunk new];
-    [chunk setX:coord.x];
-    [chunk setZ:coord.z];
-    [chunk setWorld:self];
-    [chunkPool setObject:chunk forKey:ckeid];
-    return [chunk autorelease];
 }
 
 /*
@@ -54,66 +58,87 @@
 
 -(void)deallocateChunk:(NSDictionary*)infoDict
 {
-    [chunkPool removeObjectForKey:[NSString stringWithFormat:@"%d-%d", [[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Z"] intValue]]];
+    @synchronized(self)
+    {
+        CFDictionaryRemoveValue((CFMutableDictionaryRef)chunkPool, (void*)(([[infoDict objectForKey:@"X"] intValue] << 16) | [[infoDict objectForKey:@"Z"] intValue]));
+    }
 }
 
 -(void)allocateChunk:(NSDictionary*)infoDict
 {
-    [self chunkAtCoord:MCChunkCoordMake([[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Z"] intValue]) allocate:YES];   
+    @synchronized(self)
+    {
+        [self chunkAtCoord:MCChunkCoordMake([[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Z"] intValue]) allocate:YES];   
+    }
 }
 
 -(void)updateChunk:(NSDictionary*)infoDict
 {
-    [[self chunkAtCoord:MCChunkCoordMake([[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Z"] intValue]) allocate:YES] updateChunk:infoDict];
+    @synchronized(self)
+    {
+        [[self chunkAtCoord:MCChunkCoordMake([[infoDict objectForKey:@"X"] intValue], [[infoDict objectForKey:@"Z"] intValue]) allocate:YES] updateChunk:infoDict];
+    }
 }
 
 -(void)removeChunkFromPool:(MCChunk *)chunk
 {
-    [chunkPool removeObjectForKey:[NSString stringWithFormat:@"%d-%d", chunk.x, chunk.z]];
+    @synchronized(self)
+    {
+        CFDictionaryRemoveValue((CFMutableDictionaryRef)chunkPool, (void*)((chunk.x << 16) | chunk.z));
+    }
 }
 
 - (MCBlock)getBlock:(MCBlockCoord)coord
 {
-    int ChunkX = coord.x      / 16;
-    int ChunkY = coord.y      / 16;
-    int ChunkZ = coord.z      / 16;
-    int SctRlX = abs(coord.x) % 16;
-    int SctRlY = abs(coord.y) % 16;
-    int SctRlZ = abs(coord.z) % 16;
-    MCChunk* chunk = [self chunkAtCoord:MCChunkCoordMake(ChunkX, ChunkZ) allocate:NO];
-    MCSection* sct = [chunk sectionForYRel:ChunkY];
-    if (!sct) {
-        return (MCBlock){0,0,0,0};
+    @synchronized(self)
+    {
+        int ChunkX = coord.x      / 16;
+        int ChunkY = coord.y      / 16;
+        int ChunkZ = coord.z      / 16;
+        int SctRlX = abs(coord.x) % 16;
+        int SctRlY = abs(coord.y) % 16;
+        int SctRlZ = abs(coord.z) % 16;
+        MCChunk* chunk = [self chunkAtCoord:MCChunkCoordMake(ChunkX, ChunkZ) allocate:NO];
+        MCSection* sct = [chunk sectionForYRel:ChunkY];
+        if (!sct) {
+            return (MCBlock){0,0,0,0};
+        }
+        //NSLog(@"Parsing Anvil.. %d", ChunkY);
+        return (MCBlock){(sct->typedata[MCAnvilIndex(((MCRelativeCoord){SctRlX, SctRlY, SctRlZ}))]) ,0,0,0};
     }
-    NSLog(@"Parsing Anvil.. %d", ChunkY);
-    return (MCBlock){(sct->typedata[MCAnvilIndex(((MCRelativeCoord){SctRlX, SctRlY, SctRlZ}))]) ,0,0,0};
 }
 
 - (void)setBlock:(MCBlockCoord)coord to:(MCBlock)to
 {
-    int ChunkX = coord.x      / 16;
-    int ChunkY = coord.y      / 16;
-    int ChunkZ = coord.z      / 16;
-    if (coord.y > 0xFF) {
-        return;
-    }
-    int SctRlX = abs(coord.x) % 16;
-    int SctRlY = abs(coord.y) % 16;
-    int SctRlZ = abs(coord.z) % 16;
-    MCChunk* chunk = [self chunkAtCoord:MCChunkCoordMake(ChunkX, ChunkZ) allocate:YES];
-    MCSection* sct = [chunk sectionForYRel:ChunkY];
-    if (!sct) {
-        sct = [chunk allocateSection:ChunkY];
-        if (!sct) {
+    @synchronized(self)
+    {
+        int ChunkX = coord.x      / 16;
+        int ChunkY = coord.y      / 16;
+        int ChunkZ = coord.z      / 16;
+        if (coord.y > 0xFF) {
             return;
         }
+        int SctRlX = abs(coord.x) % 16;
+        int SctRlY = abs(coord.y) % 16;
+        int SctRlZ = abs(coord.z) % 16;
+        MCChunk* chunk = [self chunkAtCoord:MCChunkCoordMake(ChunkX, ChunkZ) allocate:YES];
+        MCSection* sct = [chunk sectionForYRel:ChunkY];
+        if (!sct) {
+            sct = [chunk allocateSection:ChunkY];
+            if (!sct) {
+                return;
+            }
+        }
+        MCSetBlockInSection(sct, MCBlockCoordMake(SctRlX, SctRlY, SctRlZ), to);
     }
-    MCSetBlockInSection(sct, MCBlockCoordMake(SctRlX, SctRlY, SctRlZ), to);
 }
 
 - (void)deallocateChunks
 {
-    [chunkPool removeAllObjects];
+    @synchronized(self)
+    {
+        [chunkPool removeAllObjects];
+    }
 }
 - (void)dealloc
 {

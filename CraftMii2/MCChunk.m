@@ -113,6 +113,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
             sections[i] = NULL;
         }
     }
+    [self setWorld:nil];
     [super dealloc];
 }
 +(MCBlockCoord)absoluteCoordToSectionRelative:(MCBlockCoord)orig
@@ -219,8 +220,6 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                     return;
                 }
                 [[world socket] chunkDidUpdate:self];
-                [self genVertexes];
-                [infoDict release];
             } else if ([[infoDict objectForKey:@"PacketType"] isEqualToString:@"MultiBlockChange"]) {
                 NSData* dt = [[infoDict objectForKey:@"Records"] zlibInflate];
                 const char* db = [dt bytes];
@@ -239,6 +238,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                     rpoint += 4;
                 }
             }
+            [infoDict release];
         }
     });
 }

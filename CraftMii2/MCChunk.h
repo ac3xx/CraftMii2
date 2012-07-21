@@ -115,7 +115,5 @@ extern MCBlock MCGetBlockInSection(MCSection* section, MCBlockCoord relativecoor
 -(MCSection*)sectionForBlockCoord:(MCBlockCoord)coord;
 -(MCSection*)sectionForYRel:(short)y;
 -(MCSection*)allocateSection:(char)index;
--(void)genVertexes;
--(void)destroyVertexes;
 @end
 MCBlock getBlock(MCBlockCoord coord, MCSocket* socket);

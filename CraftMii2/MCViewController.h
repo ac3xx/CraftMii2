@@ -39,6 +39,6 @@
     BOOL joypadMoving;
     GLuint textures[1];
 }
-@property(retain)MCSocket* socket;
+@property(retain) MCSocket* socket;
 
 @end

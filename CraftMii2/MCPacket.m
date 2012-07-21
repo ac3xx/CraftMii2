@@ -8,7 +8,6 @@
 
 #import "MCPacket.h"
 #import "MCSocket.h"
-#import "MCString.h"
 #import "MCMetadata.h"
 #import "MCSlot.h"
 #import "MCWindow.h"
@@ -16,6 +15,7 @@
 #import "MCPingPacket.h"
 #import "MCEncryptionResponse.h"
 #import "NSData+UserAdditions.h"
+#import "NSString+Minecraft.h"
 @implementation MCPacket
 @synthesize sock,identifier,buffer;
 +(MCPacket*)packetWithID:(unsigned char)idt andSocket:(MCSocket*)sock
@@ -26,7 +26,7 @@
     [kret setBuffer:nil];
     [kret preload];
     [[sock inputStream] setDelegate:kret];
-    return kret;
+    return [kret autorelease];
 }
 - (id)init
 {
@@ -37,7 +37,7 @@
     cachedoffset3 = -1;
     cached_bflen = 0;
     bytestoread = 1;
-    return self;
+    return [self retain];
 }
 - (void)preload
 {
@@ -187,11 +187,11 @@
                     if (cached_bflen>=2) {
                         
                         if (cachedoffset==-1) {
-                            cachedoffset = (flipshort(*(short*)data));
+                            cachedoffset = (OSSwapInt16(*(short*)data));
                         }
                         if (cached_bflen == cachedoffset * 2 + 2)
                         {
-                            NSString* kdata=[MCString NSStringWithMinecraftString:(m_char_t*)data];
+                            NSString* kdata=[NSString stringWithMinecraftString:(m_char_t*)data];
                             NSString* result = @"Unknown";
                             NSString* error = @"";
                             NSString* ekey = @"";
@@ -225,19 +225,19 @@
                 case 0xFD:
                     if (cached_bflen>=4) {
                         if (cachedoffset==-1) {
-                            cachedoffset = (flipshort(*(short*)data)) * 2 + 2;
+                            cachedoffset = (OSSwapInt16(*(short*)data)) * 2 + 2;
                             bytestoread = cachedoffset - 2;
                         }
                         if (cached_bflen >= cachedoffset + 2)
                         {
                             if (cachedoffset1==-1) {
-                                cachedoffset1 = (flipshort(*(short*)(data + cachedoffset)));
+                                cachedoffset1 = (OSSwapInt16(*(short*)(data + cachedoffset)));
                                 NSLog(@"len is 0x%02X", cachedoffset1);
                                 bytestoread = cachedoffset1;
                             }
                             if (cached_bflen == cachedoffset1 + cachedoffset + 2)
                             {
-                                NSString* sid = [MCString NSStringWithMinecraftString:(m_char_t*)data];
+                                NSString* sid = [NSString stringWithMinecraftString:(m_char_t*)data];
                                 NSData* pubKey = [NSData dataWithBytes:((char*)(data + cachedoffset + 2))  length:cachedoffset1];
                                 [[MCLoginPacket packetWithInfo:nil] sendToSocket:[self sock]];
                                 unsigned char* ssecret = malloc(16);
@@ -274,7 +274,7 @@
                     if (cached_bflen>=8) {
                         
                         if (cachedoffset==-1) {
-                            cachedoffset = (flipshort(*(short*)(data+6)));
+                            cachedoffset = (OSSwapInt16(*(short*)(data+6)));
                             bytestoread = cachedoffset * 2;
                         }
                         if (cached_bflen == (cachedoffset * 2 + 19))
@@ -309,7 +309,7 @@
                             }
                             NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                                       [NSNumber numberWithInt:OSSwapInt32((*(int*)data))], @"EntityID",
-                                                      [MCString NSStringWithMinecraftString:(m_char_t*)(data+6)], @"WorldType",
+                                                      [NSString stringWithMinecraftString:(m_char_t*)(data+6)], @"WorldType",
                                                       (OSSwapInt32((*(int*)(data+8+cachedoffset*2)))) == 0 ? @"Survival" : @"Creative", @"GameMode",
                                                       @"Login", @"PacketType",
                                                       type, @"Dimension",
@@ -361,7 +361,7 @@
                             }
                             NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                                       [NSNumber numberWithInt:OSSwapInt32((*(int*)data))], @"EntityID",
-                                                      [MCString NSStringWithMinecraftString:(m_char_t*)(data+4)], @"WorldType",
+                                                      [NSString stringWithMinecraftString:(m_char_t*)(data+4)], @"WorldType",
                                                       *(char*)((data+6+cachedoffset)) == 0 ? @"Survival" : @"Creative", @"GameMode",
                                                       @"Login", @"PacketType",
                                                       type, @"Dimension",
@@ -379,13 +379,13 @@
                 case 0xFA:
                     if (cached_bflen>=2) {
                         
-                        short len = flipshort(*(short*)data);
+                        short len = OSSwapInt16(*(short*)data);
                         if (cached_bflen >= (len*2 + 4))
                         {
-                            short lenk = flipshort(*(short*)(data+(len*2 + 2)));
+                            short lenk = OSSwapInt16(*(short*)(data+(len*2 + 2)));
                             if (cached_bflen == (len*2 + 2 + lenk + 2))
                             {
-                                NSString* channel = [MCString NSStringWithMinecraftString:(m_char_t*)(data)];
+                                NSString* channel = [NSString stringWithMinecraftString:(m_char_t*)(data)];
                                 NSData* kdata = [NSData dataWithBytes:(data+2+len*2+2) length:lenk];
                                 NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                                           channel, @"Channel",
@@ -456,7 +456,7 @@
                             char wid = *(char*)data;
                             char ty = *(char*)(data+1);
                             char cnt = *(char*)(data+cached_bflen-1);
-                            NSString* title = [MCString NSStringWithMinecraftString:(m_char_t*)(data+2)];
+                            NSString* title = [NSString stringWithMinecraftString:(m_char_t*)(data+2)];
                             MCWindow* kw=[MCWindow windowWithID:wid];
                             [kw setWid:wid];
                             [kw setType:ty];
@@ -585,10 +585,10 @@
                     }
                     if ((cached_bflen == 10+(short)cachedoffset+(short)cachedoffset1+(short)cachedoffset2+(short)cachedoffset3) && (short)cachedoffset != -1 && (short)cachedoffset1 != -1 && (short)cachedoffset2 != -1 && (short)cachedoffset3 != -1) {
                         NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                                  [MCString NSStringWithMinecraftString:(m_char_t*)(data+10)], @"Line1",
-                                                  [MCString NSStringWithMinecraftString:(m_char_t*)(data+10+(short)cachedoffset)], @"Line2",
-                                                  [MCString NSStringWithMinecraftString:(m_char_t*)(data+10+(short)cachedoffset+(short)cachedoffset1)], @"Line3",
-                                                  [MCString NSStringWithMinecraftString:(m_char_t*)(data+10+(short)cachedoffset+(short)cachedoffset1+(short)cachedoffset2)], @"Line4",
+                                                  [NSString stringWithMinecraftString:(m_char_t*)(data+10)], @"Line1",
+                                                  [NSString stringWithMinecraftString:(m_char_t*)(data+10+(short)cachedoffset)], @"Line2",
+                                                  [NSString stringWithMinecraftString:(m_char_t*)(data+10+(short)cachedoffset+(short)cachedoffset1)], @"Line3",
+                                                  [NSString stringWithMinecraftString:(m_char_t*)(data+10+(short)cachedoffset+(short)cachedoffset1+(short)cachedoffset2)], @"Line4",
                                                   [NSNumber numberWithInt:OSSwapInt32(*(int*)data)], @"X",
                                                   [NSNumber numberWithShort:OSSwapInt16(*(int*)(data+4))], @"Y",
                                                   [NSNumber numberWithInt:OSSwapInt32(*(int*)(data+6))], @"Z",
@@ -649,13 +649,13 @@
                     if (cached_bflen >= 2) {
                         if (cached_bflen == 2) {
                             
-                            cachedoffset = (flipshort(*(short*)data));
+                            cachedoffset = (OSSwapInt16(*(short*)data));
                             bytestoread = cachedoffset * 2;
                         } else
                             if (cachedoffset*2 + 2 >= cached_bflen)
                             {
                                 NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                                          [MCString createColorandTextPairsForMinecraftFormattedString:[MCString NSStringWithMinecraftString:(m_char_t *)data]], @"Message",
+                                                          [[NSString stringWithMinecraftString:(m_char_t *)data] attributedString], @"Message",
                                                           @"ChatMessage", @"PacketType",
                                                           nil];
                                 [[self sock] packet:self gotParsed:infoDict];
@@ -668,11 +668,11 @@
                 case 0xFF:
                     if (cached_bflen >= 2) {
                         
-                        short len = flipshort(*(short*)data);
+                        short len = OSSwapInt16(*(short*)data);
                         if (cached_bflen == (len*2 + 2))
                         {
                             NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                                      [MCString createColorandTextPairsForMinecraftFormattedString:[MCString NSStringWithMinecraftString:(m_char_t *)data]], @"Message",
+                                                      [[NSString stringWithMinecraftString:(m_char_t *)data] attributedString], @"Message",
                                                       @"Disconnect", @"PacketType",
                                                       nil];
                             [[self sock] packet:self gotParsed:infoDict];
@@ -921,7 +921,7 @@
                 case 0x09:
                     if (cached_bflen>10) {
                         
-                        short len = flipshort(*(short*)(data+8));
+                        short len = OSSwapInt16(*(short*)(data+8));
                         if (cached_bflen == (len*2+10))
                         {
                             int worldtype=OSSwapInt32(*(int*)data);
@@ -957,7 +957,7 @@
                                                       diff, @"Difficulty",
                                                       ((*(char*)(data+5)) == 0) ? @"Survival" : @"Creative" , @"GameMode",
                                                       [NSNumber numberWithShort:OSSwapInt16(*(short*)(data+6))], @"WorldHeight",
-                                                      [MCString NSStringWithMinecraftString:((m_char_t*)(data+8))], @"WorldType",
+                                                      [NSString stringWithMinecraftString:((m_char_t*)(data+8))], @"WorldType",
                                                       nil];
                             [[[self sock] inputStream] setDelegate:[self sock]];
                             [[self sock] packet:self gotParsed:infoDict];
@@ -1103,11 +1103,11 @@
                 case 0xC9:
                     if (cached_bflen >= 2) {
                         
-                        short len = flipshort(*(short*)data);
+                        short len = OSSwapInt16(*(short*)data);
                         if (cached_bflen == (len*2 + 5))
                         {
                             NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                                      [MCString createColorandTextPairsForMinecraftFormattedString:[MCString NSStringWithMinecraftString:(m_char_t *)data]], @"Nick",
+                                                      [[NSString stringWithMinecraftString:(m_char_t *)data] attributedString], @"Nick",
                                                       [NSNumber numberWithShort:OSSwapInt16(*(short*)(data+3+len*2))], @"Ping",
                                                       [NSNumber numberWithBool:(*(BOOL*)(data+len*2+2))], @"IsOnline",
                                                       @"PlayerListItem", @"PacketType",
@@ -1631,7 +1631,7 @@
                 case 0x14:
                     if (cached_bflen > 6) {
                         
-                        short len = flipshort(*(short*)(data+4));
+                        short len = OSSwapInt16(*(short*)(data+4));
                         if (cached_bflen == (len*2 + 22))
                         {
                             int x=OSSwapInt32(*(int*)(data+len*2+6));
@@ -1639,7 +1639,7 @@
                             int z=OSSwapInt32(*(int*)(data+len*2+14));
                             NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                                       [NSNumber numberWithInt:OSSwapInt32(*(int*)data)], @"EntityID",
-                                                      [MCString NSStringWithMinecraftString:(m_char_t*)(data+4)], @"Name",
+                                                      [NSString stringWithMinecraftString:(m_char_t*)(data+4)], @"Name",
                                                       [NSNumber numberWithDouble:(double)x/32.0], @"X",
                                                       [NSNumber numberWithDouble:(double)y/32.0], @"Y",
                                                       [NSNumber numberWithDouble:(double)z/32.0], @"Z",
@@ -1660,7 +1660,7 @@
                 case 0x19:
                     if (cached_bflen >= 6) {
                         
-                        short len = flipshort(*(short*)(data+4));
+                        short len = OSSwapInt16(*(short*)(data+4));
                         if (cached_bflen == (len*2 + 22))
                         {
                             int x=OSSwapInt32(*(int*)(data+len*2+6));
@@ -1669,7 +1669,7 @@
                             int direct=OSSwapInt32(*(int*)(data+len*2+18));
                             NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
                                                       [NSNumber numberWithInt:OSSwapInt32(*(int*)data)], @"EntityID",
-                                                      [MCString NSStringWithMinecraftString:(m_char_t*)(data+4)], @"Name",
+                                                      [NSString stringWithMinecraftString:(m_char_t*)(data+4)], @"Name",
                                                       [NSNumber numberWithInt:x], @"X",
                                                       [NSNumber numberWithInt:y], @"Y",
                                                       [NSNumber numberWithInt:z], @"Z",
@@ -1840,7 +1840,7 @@
                 default:
                     NSLog(@"Unknown packet [%02X] - Disconnecting!", identifier);
                     NSDictionary* kinfoDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                               [MCString createColorandTextPairsForMinecraftFormattedString:@"Protocol Error"], @"Message",
+                                               [@"Protocol Error" attributedString], @"Message",
                                                @"Disconnect", @"PacketType",
                                                nil];
                     [self setIdentifier:0xFF];

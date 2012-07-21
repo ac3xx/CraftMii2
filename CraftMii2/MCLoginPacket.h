@@ -8,17 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import "MCSendPacket.h"
-#import "MCString.h"
+#import "NSString+Minecraft.h"
 
 @interface MCLoginPacket : MCSendPacket
 {
-#ifndef __MC_SMP_13
     int version;
 }
 @property(assign) int version;
-#else
-}
-#endif
 +(MCLoginPacket*)packetWithInfo:(NSDictionary*)infoDict;
 -(void)sendToSocket:(MCSocket*)socket;
 @end

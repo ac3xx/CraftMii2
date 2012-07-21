@@ -12,6 +12,7 @@
 #import "MCSocket.h"
 #import "MCPlayer.h"
 #import "MCWorld.h"
+#define VIEW_DISTANCE 40
 #define VCHUNKS   16
 #define VSECTIONS 16
 #define YTOUCH_SPEED 0.01f
@@ -78,10 +79,10 @@ enum
 {
     if (touchDistance) {
         float rel = RAD2DEG(touchAngle);
-        [[socket_ player] setZ:[[socket_ player] z]+(0.5f*sin(DEG2RAD(fmod(rel + [[socket_ player] yaw] - 90.0f, 360))))];
-        [[socket_ player] setX:[[socket_ player] x]+(0.5f*cos(DEG2RAD(fmod(rel + [[socket_ player] yaw] - 90.0f, 360))))];
+        [[socket_ player] setZ:[[socket_ player] z]+(0.5f*sin(DEG2RAD(fmod(rel + [[socket_ player] yaw], 360))))];
+        [[socket_ player] setX:[[socket_ player] x]+(0.5f*cos(DEG2RAD(fmod(rel + [[socket_ player] yaw], 360))))];
     }
-    else if(touchHash2)
+    if (touchHash2)
     {
         [[socket_ player] setYaw:fmod([[socket_ player] yaw] + RAD2DEG(sAngle), 360.0f)];
         float pt = [[socket_ player] pitch] + RAD2DEG(mAngle);
@@ -175,16 +176,16 @@ enum
 		if ([touch hash] == touchHash && joypadMoving) {
 			float dx = (float)joypadCenterX - (float)touchLocation.x;
 			float dy = (float)joypadCenterY - (float)touchLocation.y;
-			touchDistance = fabs(sqrtf((joypadCenterX - touchLocation.x) * (joypadCenterX - touchLocation.x) + 
-                                  (joypadCenterY - touchLocation.y) * (joypadCenterY - touchLocation.y)));
-            touchAngle = atan2(dx, -dy);
+            touchDistance = sqrtf(dx*dx + dy*dy);
+            touchAngle = atan2(dy, dx);
 			if (touchDistance > joypadRadius) {
-                joypadCap.center = CGPointMake(joypadCenterX - cosf(atan2(dy, dx)) * joypadRadius, 
-                                               joypadCenterY - sinf(atan2(dy, dx)) * joypadRadius);
+                joypadCap.center = CGPointMake(joypadCenterX - cosf(touchAngle) * joypadRadius, 
+                                               joypadCenterY - sinf(touchAngle) * joypadRadius);
 			} else {
 				joypadCap.center = touchLocation;
 			}
-		} else if ([touch hash] == touchHash2)
+		} 
+        if ([touch hash] == touchHash2)
         {
             float x = sinf((sPoint.x - touchLocation.x) * YTOUCH_SPEED) * cosf((sPoint.x - touchLocation.x) * YTOUCH_SPEED);
             float y = sinf((sPoint.y - touchLocation.y) * PTOUCH_SPEED);
@@ -207,7 +208,8 @@ enum
 			touchAngle = 0;
 			joypadCap.center = CGPointMake(joypadCenterX, joypadCenterY);
 			return;
-		} else if ([touch hash] == touchHash2)
+		} 
+        if ([touch hash] == touchHash2)
         {
             sPoint = CGPointMake(0, 0);
             touchHash2 = 0;
@@ -339,6 +341,8 @@ enum
     if (image == nil)
     {
         NSLog(@"Well, fuck.");
+        [image release];
+        [texData release];
         return;
     }
     GLuint width = CGImageGetWidth(image.CGImage)/16;
@@ -393,6 +397,7 @@ enum
 
 - (void)viewWillDisappear:(BOOL)animated
 {
+    socket = nil;
     [self.navigationController setNavigationBarHidden:NO animated:NO];
 }
 
@@ -406,44 +411,50 @@ char block;
 
 - (void)update
 {
-    struct MCVertex* vertexes=malloc(VCHUNKS * 16 * VSECTIONS * 16 * 6 * 6);
-    int i = 0;
-    bzero(vertexes, sizeof(vertexes));
-    for (int chunk = 0; chunk < VCHUNKS; chunk++) {
-        for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < VSECTIONS*16; y++) {
-                for (int z = 0; z < 16; z++) {
-                    int rx = chunk * x + [[socket player] x];
-                    int ry = y;
-                    int rz = chunk * z + [[socket player] z];
-                    MCBlock blk = [[socket world] getBlock:MCBlockCoordMake(rx, ry, rz)];
-                    if (blk.typedata == 0) {
-                        continue;
+    if (socket) {
+        int chunks_to_load = VIEW_DISTANCE / 16;
+        int i = 0;
+        int px = [[socket player] x];
+        int pz = [[socket player] z];
+        id world = [socket world];
+        struct MCVertex* vertexes=malloc(chunks_to_load * 16 * VSECTIONS * 16 * 6 * 6);
+        bzero(vertexes, sizeof(vertexes));
+        for (int chunk = 0; chunk < chunks_to_load; chunk++) {
+            for (int x = 0; x < 16; x++) {
+                for (int y = 0; y < chunks_to_load; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        int rx = chunk * x + px;
+                        int ry = y;
+                        int rz = chunk * z + pz;
+                        MCBlock blk = [world getBlock:MCBlockCoordMake(rx, ry, rz)];
+                        if (blk.typedata == 0) {
+                            continue;
+                        }
+                        /*
+                         NegX
+                         */
+                        vertexes[i++] = (struct MCVertex) {rx, ry, rz, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx, ry, rz+1, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx, ry+1, rz, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx, ry+1, rz, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx, ry, rz+1, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx, ry+1, rz+1, blk.typedata & 0xFF};
+                        /*
+                         PosX
+                         */
+                        vertexes[i++] = (struct MCVertex) {rx+1, ry, rz, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx+1, ry, rz+1, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz+1, blk.typedata & 0xFF};
+                        vertexes[i++] = (struct MCVertex) {rx+1, ry, rz+1, blk.typedata & 0xFF};
                     }
-                    /*
-                     NegX
-                     */
-                    vertexes[i++] = (struct MCVertex) {rx, ry, rz, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx, ry, rz+1, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx, ry+1, rz, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx, ry+1, rz, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx, ry, rz+1, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx, ry+1, rz+1, blk.typedata & 0xFF};
-                    /*
-                     PosX
-                     */
-                    vertexes[i++] = (struct MCVertex) {rx+1, ry, rz, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx+1, ry, rz+1, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz+1, blk.typedata & 0xFF};
-                    vertexes[i++] = (struct MCVertex) {rx+1, ry, rz+1, blk.typedata & 0xFF};
                 }
             }
         }
+        free(vertexes);
+        _rotation += self.timeSinceLastUpdate * 0.5f;
     }
-    free(vertexes);
-    _rotation += self.timeSinceLastUpdate * 0.5f;
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect

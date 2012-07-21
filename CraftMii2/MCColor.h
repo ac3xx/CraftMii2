@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MCColor : UIColor
+@interface UIColor (MCColor)
 +(UIColor*)colorWithCode:(char)code;
 +(UIColor*)shadowForCode:(char)code;
 @end

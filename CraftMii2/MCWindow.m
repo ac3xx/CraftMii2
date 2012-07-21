@@ -7,12 +7,12 @@
 //
 
 #import "MCWindow.h"
+static NSMutableDictionary* windowPool=nil;
 
 @implementation MCWindow
 @synthesize wid, items, type, title, size;
 +(MCWindow*)windowWithID:(unsigned char)identifier
 {
-    static NSMutableDictionary* windowPool;
     if (!windowPool) {
         windowPool=[NSMutableDictionary new];
     }
@@ -23,8 +23,15 @@
     }
     window = [MCWindow new];
     [window setWid:identifier];
-    [window setItems:[NSMutableArray new]];
+    [window setItems:[[NSMutableArray new] autorelease]];
     [windowPool setObject:window forKey:nseid];
     return [window autorelease];
+}
+-(void)dealloc
+{
+    [windowPool removeObjectForKey:[NSNumber numberWithUnsignedInt:wid]];
+    [self setItems:nil];
+    [self setTitle:nil];
+    [super dealloc];
 }
 @end

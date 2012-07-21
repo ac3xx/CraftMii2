@@ -9,7 +9,6 @@
 // 4.27
 
 #import "MCSocket.h"
-#import "MCString.h"
 #import "MCPacket.h"
 #import "MCWindow.h"
 #import "MCHandshakePacket.h"
@@ -33,7 +32,7 @@ static int currentIdentifier = 0;
     NSLog(@"ID: %d", currentIdentifier);
     [self setAuth:iauth];
     [self setServer:iserver];
-    [self setWorld:[MCWorld new]];
+    [self setWorld:[[MCWorld new] autorelease]];
     [[self world] setSocket:self];
     return self;
 }
@@ -50,6 +49,7 @@ static int currentIdentifier = 0;
         [pool release];
         pool = [NSAutoreleasePool new];
     }
+    [pool release];
 }
 -(void)connect
 {
@@ -317,10 +317,25 @@ static int currentIdentifier = 0;
             [delegate chunkDidUpdate:chunk];
         });
     }
+}/*
+-(id)retain
+{
+    if ([[[NSThread callStackSymbols] objectAtIndex:0] rangeOfString:@"MCPacket"].location == NSNotFound) {
+        NSLog(@"+ %@", [NSThread callStackSymbols]);
+    }
+    return [super retain];
 }
+-(oneway void)release
+{
+    if ([[[NSThread callStackSymbols] objectAtIndex:0] rangeOfString:@"MCPacket"].location == NSNotFound) {
+        NSLog(@"- %@", [NSThread callStackSymbols]);
+    }
+    [super release];
+}*/
 -(void)dealloc
 {
-    NSLog(@"== BAIL ==");
+    [self retain];
+    [self disconnectWithReason:@"Socket Released"];
     currentIdentifier--;
     free((void*)[self dataBuffer]);
     free((void*)[self metadataArea]);

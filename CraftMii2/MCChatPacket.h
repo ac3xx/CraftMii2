@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "MCSendPacket.h"
-#import "MCString.h"
 
 @interface MCChatPacket : MCSendPacket
 {

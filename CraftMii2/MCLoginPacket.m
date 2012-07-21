@@ -22,14 +22,12 @@
 -(void)sendToSocket:(MCSocket *)socket
 {
     [[socket outputBuffer] writeByte:0x01];
-#ifndef __MC_SMP_13
     version = OSSwapInt32([socket version]);
-    m_char_t* __name_msg=[MCString MCStringFromString:[[socket auth] username]];
+    m_char_t* __name_msg= [[[socket auth] username] minecraftString];
     [[socket outputBuffer] write:(uint8_t*)&version length:4];
     [[socket outputBuffer] write:(uint8_t*)__name_msg length:m_char_t_sizeof(__name_msg)];
     [[socket outputBuffer] writeZeroes:13];
     free(__name_msg);
-#endif
 }
 -(void)dealloc
 {

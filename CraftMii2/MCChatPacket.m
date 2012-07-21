@@ -7,7 +7,7 @@
 //
 
 #import "MCChatPacket.h"
-#import "MCString.h"
+#import "NSString+Minecraft.h"
 @implementation MCChatPacket
 @synthesize message;
 +(MCChatPacket*)packetWithInfo:(NSDictionary *)infoDict
@@ -21,7 +21,7 @@
 }
 -(void)sendToSocket:(MCSocket *)socket
 {
-    m_char_t* text=[MCString MCStringFromString:[self message]];
+    m_char_t* text=[[self message] minecraftString];
     unsigned char pckid=0x02;
     [[socket outputStream] write:(uint8_t*)&pckid   maxLength:1];
     [[socket outputStream] write:(uint8_t*)text     maxLength:m_char_t_sizeof(text)];

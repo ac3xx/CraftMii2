@@ -42,7 +42,7 @@
         splitViewController.viewControllers = [NSArray arrayWithObjects:masterNavigationController, detailNavigationController, nil];
         [self setViewController: splitViewController];
     } else {
-        UINavigationController* _loginView = [[UINavigationController alloc] initWithRootViewController:[[[MCLoginView alloc] initWithStyle:UITableViewStyleGrouped] autorelease]];
+        UINavigationController* _loginView = [[[UINavigationController alloc] initWithRootViewController:[[[MCLoginView alloc] initWithStyle:UITableViewStyleGrouped] autorelease]] autorelease];
         // Creates the view(s) and adds them to the dire
         [self setViewController: _loginView];
     }

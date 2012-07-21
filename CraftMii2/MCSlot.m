@@ -140,7 +140,7 @@ const NSString* MCEnchantmentName(MCEnchantment ench)
         buffer = [NSMutableData new];
     }
     if (!slotData) {
-        [self setSlotData:[NSMutableDictionary new]];
+        [self setSlotData:[[NSMutableDictionary new] autorelease]];
     }
     switch (streamEvent) {
         case NSStreamEventHasBytesAvailable:
@@ -199,6 +199,7 @@ end:
 {
     NSLog(@"Out!");
     [self setSlotData:nil];
+    [self setWindow:nil];
     [super dealloc];
 }
 @end
