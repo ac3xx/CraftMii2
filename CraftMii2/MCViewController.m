@@ -151,6 +151,7 @@ GLfloat gCubeVertexData[216] =
         mAngle = 0;
         sAngle = 0;
     }
+    [self updateChunks];
 }
 
 - (void)viewDidLoad
@@ -511,7 +512,6 @@ GLfloat gCubeVertexData[216] =
 
 - (void)update
 {
-    [self updateChunks];
     /*
     if (lastChunkCoord.x != socket.player.x/16) {
         if (lastChunkCoord.z != socket.player.z/16) {

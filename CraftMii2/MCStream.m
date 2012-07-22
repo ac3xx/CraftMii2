@@ -121,10 +121,15 @@
             readbufreadpos=0;
         }
         if (RBUFSIZE-readbufpos) {
-            readbufpos = [self _read:(uint_fast8_t*)(readbuf+readbufpos) maxLength:(RBUFSIZE-readbufpos)];
-            while (readbufreadpos - readbufpos) {
-                [delegate stream:(NSStream*)self handleEvent:streamEvent];
-            }
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0ul), ^(){
+            @synchronized(self)
+                {
+                    readbufpos += [self _read:(uint_fast8_t*)(readbuf+readbufpos) maxLength:(RBUFSIZE-readbufpos)];
+                    while (readbufreadpos - readbufpos) {
+                        [delegate stream:(NSStream*)self handleEvent:streamEvent];
+                    }
+                }
+            });
             return;
         }
     }
