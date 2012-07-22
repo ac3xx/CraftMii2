@@ -1,8 +1,8 @@
 //
 //  Shader.vsh
-//  CraftMii2
+//  Test
 //
-//  Created by qwertyoruiop on 18/07/12.
+//  Created by qwertyoruiop on 22/07/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
@@ -25,5 +25,4 @@ void main()
     colorVarying = diffuseColor * nDotVP;
     
     gl_Position = modelViewProjectionMatrix * position;
-    
 }

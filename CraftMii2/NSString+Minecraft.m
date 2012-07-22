@@ -34,7 +34,6 @@
     NSMutableAttributedString* rt = [[NSMutableAttributedString alloc] init];
     for (NSString* piece in pieces) {
         if ([piece length] > 1) {
-            NSLog(@"%@", kCTForegroundColorAttributeName);
             [rt appendAttributedString:[[[NSAttributedString alloc] initWithString:[piece substringFromIndex:1] attributes:[NSDictionary dictionaryWithObjectsAndKeys:(id)[[UIColor colorWithCode:*[[piece substringToIndex:1] UTF8String]] CGColor], (NSString*)kCTForegroundColorAttributeName,nil]] autorelease]];
         }
     }

@@ -88,18 +88,29 @@
     }
 }
 
-- (MCBlock)getBlock:(MCBlockCoord)coord
+- (MCSection*)getSection:(MCBlockCoord)coord
 {
     @synchronized(self)
     {
         int ChunkX = coord.x      / 16;
         int ChunkY = coord.y      / 16;
         int ChunkZ = coord.z      / 16;
+        MCChunk* chunk = [self chunkAtCoord:MCChunkCoordMake(ChunkX, ChunkZ) allocate:NO];
+        MCSection* sct = [chunk sectionForYRel:ChunkY];
+        if (!sct) {
+            return NULL;
+        }
+        return sct;
+    }
+}
+- (MCBlock)getBlock:(MCBlockCoord)coord
+{
+    @synchronized(self)
+    {
         int SctRlX = abs(coord.x) % 16;
         int SctRlY = abs(coord.y) % 16;
         int SctRlZ = abs(coord.z) % 16;
-        MCChunk* chunk = [self chunkAtCoord:MCChunkCoordMake(ChunkX, ChunkZ) allocate:NO];
-        MCSection* sct = [chunk sectionForYRel:ChunkY];
+        MCSection* sct = [self getSection:coord];
         if (!sct) {
             return (MCBlock){0,0,0,0};
         }
@@ -130,6 +141,7 @@
             }
         }
         MCSetBlockInSection(sct, MCBlockCoordMake(SctRlX, SctRlY, SctRlZ), to);
+        [chunk refresh];
     }
 }
 

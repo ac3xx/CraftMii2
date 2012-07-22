@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <GLKit/GLKit.h>
 #import "MCSocket.h"
+#import "MCChunk.h"
 
 @interface MCViewController : GLKViewController <MCSocketDelegate>
 {
@@ -38,6 +39,10 @@
     UIImageView* joypad;
     BOOL joypadMoving;
     GLuint textures[1];
+    MCChunkCoord lastChunkCoord;
+    struct MCVertex* vertexes;
+    int verts;
+    GLuint vbo;
 }
 @property(retain) MCSocket* socket;
 

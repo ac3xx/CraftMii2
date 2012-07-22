@@ -203,21 +203,8 @@
     }
     if ([packet identifier] == 0xFF) {
         [HUD hide:YES];
-        UIColor* color = nil;
-        self.navigationItem.prompt=@"";
         self.navigationItem.rightBarButtonItem.enabled = YES;
-        NSArray* txt = [infoDict objectForKey:@"Message"];
-        for (NSArray* message in txt) {
-            for (NSString* tx in message) {
-                if (!color) {
-                    color=(UIColor*)tx;
-                    continue;
-                }
-                self.navigationItem.prompt=[self.navigationItem.prompt stringByAppendingFormat:@"%@", tx];
-                color = nil;
-            }
-            
-        }
+        self.navigationItem.prompt = [[infoDict objectForKey:@"Message"] string];
         [[self navigationController] popToViewController:self  animated:NO];
         [[self navigationController] dismissModalViewControllerAnimated:NO];
         game = nil;

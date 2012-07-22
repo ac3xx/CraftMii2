@@ -104,9 +104,161 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 @implementation MCChunk
 @synthesize x,z,world;
 
+- (BOOL)shouldBeRendered
+{
+    return shouldBeRendered;
+}
+
+- (void)setShouldBeRendered:(BOOL)shouldBeRendered_
+{
+    hasBeenRendered = NO;
+    if (shouldBeRendered_ == NO) {
+        if (vertexData) {
+            NSLog(@"Not rendering anymore :(");
+            free(vertexData);
+            vertexData = NULL;
+        }
+    } else {
+        if (isUpdating) {
+            return;
+        }
+        if (isRendering) {
+            return;
+        }
+        isRendering = YES;
+        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0ul);
+        dispatch_async(queue, ^{
+            NSLog(@"Time to render!");
+            @synchronized(self)
+            {
+                int scts = 0;
+                for (int section = 0; section < 16; section++) {
+                    if ((sections_bitmask >> section) & 0x1) {
+                        scts++;
+                    }
+                }
+                if (vertexData) {
+                    free(vertexData);
+                    vertexData = NULL;
+                }
+                vertexData = malloc(scts * 16 * 16 * 16 * sizeof(struct MCVertex) * 12);
+                vertexSize = 0;
+                for (int section = 0; section < 16; section++) {
+                    if ((sections_bitmask >> section) & 0x1) {
+                        for (int cx = 0; cx < 16; cx++) {
+                            int rx = (x * 16) + cx;
+                            for (int cy = 0; cy < 16; cy++) {
+                                int ry = (section * 16) + cy;
+                                for (int cz = 0; cz < 16; cz++) {
+                                    int rz = (z * 16) + cz;
+#define sct sections[section]
+                                    unsigned char btype  = sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy,cz}))];
+                                    unsigned char btype2 = (cy)         ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy-1,cz}))] : 1;
+                                    unsigned char btype3 = (cy < 16)    ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy+1,cz}))] : 1;
+                                    unsigned char btype4 = (cx)         ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx-1,cy,cz}))] : 1;
+                                    unsigned char btype5 = (cx < 16)    ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx+1,cy,cz}))] : 1;
+                                    unsigned char btype6 = (cz)         ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy,cz-1}))] : 1;
+                                    unsigned char btype7 = (cz < 16)    ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy,cz+1}))] : 1;
+                                    if (btype) {
+#define tmpvx vertexData
+#define verts vertexSize
+                                        if (!btype2) {
+                                            /* x=M z=N y=0 face */
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
+                                        }
+                                        if (!btype3) {
+                                            /* x=M z=N y=1 face */
+                                            //NSLog(@"type is %@[%d] [%d|%d|%d]", getItem(btype, 0).name, btype, rx, ry, rz);
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 0+rz};
+                                        }
+                                        if (!btype4) {
+                                            /* x=0 z=N y=M face */
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 1+rz};
+                                        }
+                                        if (!btype5) {
+                                            /* x=1 z=N y=M face */
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 1+rz};
+                                        }
+                                        if (!btype6) {
+                                            /* x=N z=0 y=M face */
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 0+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
+                                        }
+                                        if (!btype7) {
+                                            /* x=N z=1 y=M face */
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 1+rz};
+                                            tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 1+rz};
+                                        }
+                                    }
+#undef sct
+
+                                }
+                            }
+                        }
+                    }
+                }
+                hasBeenRendered = YES;
+                isRendering = NO;
+            }
+        });
+    }
+    shouldBeRendered = shouldBeRendered_;
+}
+
+- (int)vertexSize
+{
+    return vertexSize;
+}
+
+- (BOOL)hasBeenRendered
+{
+    @synchronized(self)
+    {
+        return hasBeenRendered;
+    }
+}
+
+- (struct MCVertex*)vertexData
+{
+    @synchronized(self)
+    {
+        return vertexData;
+    }
+}
+
 - (oneway void)dealloc
 {
-    NSLog(@"kthxbai");
+    if (vertexData) {
+        free(vertexData);
+    }
     for (short i=0;i<16;i++) {
         if (((sections_bitmask >> i ) & 0x1) && sections[i]) {
             free(sections[i]);
@@ -127,6 +279,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 
 -(void)updateChunk:(NSDictionary*)infoDict
 {
+    isUpdating = YES;
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
     [infoDict retain];
     dispatch_async(queue, ^{
@@ -176,6 +329,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                     [infoDict release];
                                 });
                                 NSLog(@"%d - %d - %ld", rpoint, [dt length], sizeof(biomes));
+                                isUpdating = NO;
                                 return;
                             }
                             memcpy(sections[i], (char*)(int)[dt bytes]+(rpoint), sizeof(MCSection));
@@ -188,6 +342,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                     [infoDict release];
                                 });
                                 NSLog(@"%d - %d - %ld", rpoint, [dt length], sizeof(biomes));
+                                isUpdating = NO;
                                 return;
                             }
                             bzero(sections[i]->addarray, 2048);
@@ -205,6 +360,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                             [infoDict release];
                         });
                         NSLog(@"%d - %d - %ld", rpoint, [dt length], sizeof(biomes));
+                        isUpdating = NO;
                         return;
                     }
                     memcpy(biomes, db+rpoint, sizeof(biomes));
@@ -217,6 +373,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                         [infoDict release];
                     });
                     NSLog(@"%d - %d - %ld", rpoint, [dt length], sizeof(biomes));
+                    isUpdating = NO;
                     return;
                 }
                 [[world socket] chunkDidUpdate:self];
@@ -239,10 +396,19 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                 }
             }
             [infoDict release];
+            isUpdating = NO;
+            [self refresh];
         }
     });
 }
-    
+
+-(void)refresh
+{
+    if ([self shouldBeRendered]) {
+        [self setShouldBeRendered:YES];
+    }
+}
+
 -(MCSection*)allocateSection:(char)index
 {
     if (index > 16) {

@@ -263,7 +263,7 @@ static int currentIdentifier = 0;
 - (void)disconnectWithReason:(NSString*)reason
 {
     NSDictionary* infoDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                              [NSArray arrayWithObjects:[NSArray arrayWithObjects:[UIColor whiteColor], reason, nil], nil], @"Message",
+                              [[[NSAttributedString alloc] initWithString:reason] autorelease], @"Message",
                               @"Disconnect", @"PacketType",
                               nil];
     [self packet:(MCPacket*)[MCFakePacket fakePacketWithSocket:self andIdentifier:0xFF] gotParsed:infoDict];

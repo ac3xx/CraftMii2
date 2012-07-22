@@ -69,6 +69,13 @@ typedef struct MCRelativeCoord
 #define MCBlockCoordMake(x, y, z) (MCBlockCoord){x,y,z}
 #define MCSectionReadBlockType(section, blockcoord) section.typedata
 
+struct MCVertex
+{
+    char x;
+    char y;
+    char z;
+};
+
 typedef struct MCSection
 {
     unsigned char typedata[16*16*16];
@@ -83,7 +90,7 @@ typedef struct MCSection
  ((int)  (section->addarray[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] & (__mod(relativecoord.x, 2)  ? 0x0F : 0xF0)) >> (__mod(relativecoord.x, 2)  ? 0 : 4)) << 8) & 0xFFF, \
 */
 
-#define MCAnvilIndex(relativecoord) ((relativecoord.y << 4 | relativecoord.z) << 4 | relativecoord.x)
+#define MCAnvilIndex(relativecoord) ((relativecoord.y * 16 + relativecoord.z) * 16 + relativecoord.x)
 #define MCBlockInSection(section, relativecoord) MCGetBlockInSection(section, relativecoord)
 
 typedef struct MCBlock
@@ -106,14 +113,24 @@ extern MCBlock MCGetBlockInSection(MCSection* section, MCBlockCoord relativecoor
     MCSection* sections[16];
     char biomes[16*16];
     MCWorld* world;
-    GLbyte* vertexes;
+    BOOL shouldBeRendered;
+    BOOL hasBeenRendered;
+    struct MCVertex* vertexData;
+    int vertexSize;
+    BOOL isRendering;
+    BOOL isUpdating;
 }
 @property(assign) int x;
 @property(assign) int z;
 @property(assign) MCWorld* world;
+@property(assign)  BOOL shouldBeRendered;
+@property(readonly) BOOL hasBeenRendered;
+-(struct MCVertex*)vertexData;
+-(int)vertexSize;
 -(void)updateChunk:(NSDictionary*)infoDict;
 -(MCSection*)sectionForBlockCoord:(MCBlockCoord)coord;
 -(MCSection*)sectionForYRel:(short)y;
 -(MCSection*)allocateSection:(char)index;
+-(void)refresh;
 @end
 MCBlock getBlock(MCBlockCoord coord, MCSocket* socket);

@@ -13,13 +13,20 @@
 #import "MCPlayer.h"
 #import "MCWorld.h"
 #define VIEW_DISTANCE 40
-#define VCHUNKS   16
-#define VSECTIONS 16
+#define CHNK_SZ   16
 #define YTOUCH_SPEED 0.01f
 #define PTOUCH_SPEED 0.01f
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 // Uniform index.
+
+typedef struct 
+{
+    GLfloat x;
+    GLfloat y;
+    GLfloat z;
+} Vertex3D;
+
 enum
 {
     UNIFORM_MODELVIEWPROJECTION_MATRIX,
@@ -35,6 +42,54 @@ enum
     ATTRIB_NORMAL,
     NUM_ATTRIBUTES
 };
+
+GLfloat gCubeVertexData[216] = 
+{
+    // Data layout for each line below is:
+    // positionX, positionY, positionZ,     normalX, normalY, normalZ,
+    0.5f, -0.5f, -0.5f,        1.0f, 0.0f, 0.0f,
+    0.5f, 0.5f, -0.5f,         1.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
+    0.5f, 0.5f, -0.5f,          1.0f, 0.0f, 0.0f,
+    0.5f, 0.5f, 0.5f,         1.0f, 0.0f, 0.0f,
+    
+    0.5f, 0.5f, -0.5f,         0.0f, 1.0f, 0.0f,
+    -0.5f, 0.5f, -0.5f,        0.0f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.5f,          0.0f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.5f,          0.0f, 1.0f, 0.0f,
+    -0.5f, 0.5f, -0.5f,        0.0f, 1.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f,         0.0f, 1.0f, 0.0f,
+    
+    -0.5f, 0.5f, -0.5f,        -1.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,       -1.0f, 0.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f,         -1.0f, 0.0f, 0.0f,
+    -0.5f, 0.5f, 0.5f,         -1.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,       -1.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f,        -1.0f, 0.0f, 0.0f,
+    
+    -0.5f, -0.5f, -0.5f,       0.0f, -1.0f, 0.0f,
+    0.5f, -0.5f, -0.5f,        0.0f, -1.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f,        0.0f, -1.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f,        0.0f, -1.0f, 0.0f,
+    0.5f, -0.5f, -0.5f,        0.0f, -1.0f, 0.0f,
+    0.5f, -0.5f, 0.5f,         0.0f, -1.0f, 0.0f,
+    
+    0.5f, 0.5f, 0.5f,          0.0f, 0.0f, 1.0f,
+    -0.5f, 0.5f, 0.5f,         0.0f, 0.0f, 1.0f,
+    0.5f, -0.5f, 0.5f,         0.0f, 0.0f, 1.0f,
+    0.5f, -0.5f, 0.5f,         0.0f, 0.0f, 1.0f,
+    -0.5f, 0.5f, 0.5f,         0.0f, 0.0f, 1.0f,
+    -0.5f, -0.5f, 0.5f,        0.0f, 0.0f, 1.0f,
+    
+    0.5f, -0.5f, -0.5f,        0.0f, 0.0f, -1.0f,
+    -0.5f, -0.5f, -0.5f,       0.0f, 0.0f, -1.0f,
+    0.5f, 0.5f, -0.5f,         0.0f, 0.0f, -1.0f,
+    0.5f, 0.5f, -0.5f,         0.0f, 0.0f, -1.0f,
+    -0.5f, -0.5f, -0.5f,       0.0f, 0.0f, -1.0f,
+    -0.5f, 0.5f, -0.5f,        0.0f, 0.0f, -1.0f
+};
+
 
 @interface MCViewController () {
     GLuint _program;
@@ -330,47 +385,51 @@ enum
 
 - (void)setupGL
 {
+    
+    [self updateChunks];
+/*
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+
+    glGenVertexArraysOES(1, &_vertexArray);
+    glBindVertexArrayOES(_vertexArray);
+    
+    glGenBuffers(1, &_vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, verts*sizeof(struct MCVertex), vertexes, GL_DYNAMIC_DRAW);
+    
+    glEnableVertexAttribArray(GLKVertexAttribPosition);
+    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(0));
+    glEnableVertexAttribArray(GLKVertexAttribNormal);
+    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
+    
+    glBindVertexArrayOES(0);*/
     [EAGLContext setCurrentContext:self.context];
     
     [self loadShaders];
-    glGenTextures(1, &textures[0]);
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"terrain" ofType:@"png"];
-    NSData *texData = [[NSData alloc] initWithContentsOfFile:path];
-    UIImage *image = [[UIImage alloc] initWithData:texData];
-    if (image == nil)
-    {
-        NSLog(@"Well, fuck.");
-        [image release];
-        [texData release];
-        return;
-    }
-    GLuint width = CGImageGetWidth(image.CGImage)/16;
-    GLuint height = CGImageGetHeight(image.CGImage)*16;
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    void *imageData = malloc( height * width * 4 );
-    CGContextRef context = CGBitmapContextCreate( imageData, width, height, 8, 4 * width, colorSpace, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big );
-    CGColorSpaceRelease( colorSpace );
-    CGContextClearRect( context, CGRectMake( 0, 0, width, height ) );
-    CGContextTranslateCTM( context, 0, height - height );
-    CGContextDrawImage( context, CGRectMake( 0, 0, width, height ), image.CGImage );
     
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-    
-    CGContextRelease(context);
-    
-    free(imageData);
-    [image release];
-    [texData release];
-    
-
     self.effect = [[[GLKBaseEffect alloc] init] autorelease];
     self.effect.light0.enabled = GL_TRUE;
     self.effect.light0.diffuseColor = GLKVector4Make(1.0f, 0.4f, 0.4f, 1.0f);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_SRC_COLOR);
-    glEnable(GL_CULL_FACE);
+    
+    glEnable(GL_DEPTH_TEST);
+    
+    glGenVertexArraysOES(1, &_vertexArray);
+    glBindVertexArrayOES(_vertexArray);
+    
+    glGenBuffers(1, &_vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(gCubeVertexData), gCubeVertexData, GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(GLKVertexAttribPosition);
+    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(0));
+    glEnableVertexAttribArray(GLKVertexAttribNormal);
+    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
+    
+    glBindVertexArrayOES(0);
+
 }
 
 - (void)tearDownGL
@@ -401,60 +460,88 @@ enum
     [self.navigationController setNavigationBarHidden:NO animated:NO];
 }
 
-struct MCVertex
-{
-char x;
-char y;
-char z;
-char block;
-};
 
-- (void)update
+- (void)updateChunks
 {
     if (socket) {
-        int chunks_to_load = VIEW_DISTANCE / 16;
-        int i = 0;
-        int px = [[socket player] x];
-        int pz = [[socket player] z];
+        int chunk_view_distance = 3;
+        //int pl = chunk_view_distance * 2 + 1;
+        //int i = 0;
+        int ccx = [[socket player] x] / 16;
+        int ccz = [[socket player] z] / 16;
         id world = [socket world];
-        struct MCVertex* vertexes=malloc(chunks_to_load * 16 * VSECTIONS * 16 * 6 * 6);
-        bzero(vertexes, sizeof(vertexes));
-        for (int chunk = 0; chunk < chunks_to_load; chunk++) {
-            for (int x = 0; x < 16; x++) {
-                for (int y = 0; y < chunks_to_load; y++) {
-                    for (int z = 0; z < 16; z++) {
-                        int rx = chunk * x + px;
-                        int ry = y;
-                        int rz = chunk * z + pz;
-                        MCBlock blk = [world getBlock:MCBlockCoordMake(rx, ry, rz)];
-                        if (blk.typedata == 0) {
-                            continue;
-                        }
-                        /*
-                         NegX
-                         */
-                        vertexes[i++] = (struct MCVertex) {rx, ry, rz, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx, ry, rz+1, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx, ry+1, rz, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx, ry+1, rz, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx, ry, rz+1, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx, ry+1, rz+1, blk.typedata & 0xFF};
-                        /*
-                         PosX
-                         */
-                        vertexes[i++] = (struct MCVertex) {rx+1, ry, rz, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx+1, ry, rz+1, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx+1, ry+1, rz+1, blk.typedata & 0xFF};
-                        vertexes[i++] = (struct MCVertex) {rx+1, ry, rz+1, blk.typedata & 0xFF};
+        int tz = 0;
+        verts = 0;
+        NSMutableArray* drawn = [[NSMutableArray alloc] initWithCapacity:[[world chunkPool] count]];
+        for (int cx = -chunk_view_distance; cx < chunk_view_distance; cx++) {
+            int crx = ccx + cx;
+            for (int cz = -chunk_view_distance; cz < chunk_view_distance; cz++) {
+                int crz = ccz + cz;
+                MCChunk * chk = [world chunkAtCoord:MCChunkCoordMake(crx, crz) allocate:NO];
+                if (chk) {
+                    [drawn addObject:chk];
+                    if([chk hasBeenRendered])
+                    {
+                        //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+                        //glBufferData(GL_ARRAY_BUFFER, [chk vertexSize]*3, [chk vertexData], GL_STATIC_DRAW);
+                        tz += [chk vertexSize];
+                        // Should actually draw eet, but it hangs _everytheeeng_
+                    } else {
+                        [chk setShouldBeRendered:YES];
                     }
                 }
             }
         }
-        free(vertexes);
-        _rotation += self.timeSinceLastUpdate * 0.5f;
+        for (id key in [world chunkPool]) {
+            id obj = [[world chunkPool] objectForKey:key];
+            if (![drawn containsObject:obj]) {
+                [obj setShouldBeRendered:NO];
+            }
+        }
+        [drawn release];
+        //glDrawArrays(GL_TRIANGLES, 0, tz);
     }
+}
+
+- (void)chunkDidUpdate:(MCChunk *)chunk
+{
+}
+
+#pragma mark - GLKView and GLKViewController delegate methods
+
+- (void)update
+{
+    [self updateChunks];
+    /*
+    if (lastChunkCoord.x != socket.player.x/16) {
+        if (lastChunkCoord.z != socket.player.z/16) {
+            [self updateChunks];
+            lastChunkCoord = MCChunkCoordMake(socket.player.x/16, socket.player.z/16);
+        }
+    }
+    float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, 0.1f, 1500.0f);
+    self.effect.transform.projectionMatrix = projectionMatrix;
+    
+    GLKMatrix4 baseModelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
+    baseModelViewMatrix = GLKMatrix4Rotate(baseModelViewMatrix, _rotation, 0.0f, 1.0f, 0.0f);
+    
+    // Compute the model view matrix for the object rendered with GLKit
+    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -1.5f);
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 1.0f, 1.0f, 1.0f);
+    modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
+    
+    self.effect.transform.modelviewMatrix = modelViewMatrix;
+    
+    // Compute the model view matrix for the object rendered with ES2
+    modelViewMatrix = GLKMatrix4MakeTranslation(socket.player.x, socket.player.y, socket.player.z);
+    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 1.0f, 1.0f, 1.0f);
+    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 10.0f, 10.0f, 10.0f);
+    modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
+    _normalMatrix = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(modelViewMatrix), NULL);
+    
+    _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
+    _rotation += self.timeSinceLastUpdate * 0.5f;*/
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
@@ -467,15 +554,11 @@ char block;
     // Render the object with GLKit
     [self.effect prepareToDraw];
     
-    glDrawArrays(GL_TRIANGLES, 0, 36);
     
     // Render the object again with ES2
     glUseProgram(_program);
-    
     glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
     glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, _normalMatrix.m);
-    
-    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 #pragma mark -  OpenGL ES 2 shader compilation
