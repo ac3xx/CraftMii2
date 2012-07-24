@@ -366,5 +366,17 @@ typedef struct MCItem
     MCMaterial          material;
 } MCItem;
 extern MCItem itemTable[];
-extern MCItem getItem(short value, char metadata);
+static inline MCItem getItem(short value, char metadata)
+{
+    short index = 0;
+    MCItem nowChecking = itemTable[0];
+    while (nowChecking.value != -2) {
+        nowChecking = itemTable[index];
+        if (nowChecking.value == value) {
+            return nowChecking;
+        }
+        index++;
+    }
+    return itemTable[0];
+}
 extern double blockStrengthPerTick(MCTool tool, MCItem block, BOOL onGround, BOOL underwater);

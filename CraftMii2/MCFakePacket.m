@@ -20,7 +20,6 @@
 }
 - (oneway void)dealloc
 {
-    NSLog(@"kthx");
     [self setSock:nil];
     [super dealloc];
 }

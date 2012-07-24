@@ -295,20 +295,6 @@ MCItem itemTable[] =
     {-2}
 };
 
-MCItem getItem(short value, char metadata)
-{
-    short index = 0;
-    MCItem nowChecking = itemTable[0];
-    while (nowChecking.value != -2) {
-        nowChecking = itemTable[index];
-        if (nowChecking.value == value) {
-            return nowChecking;
-        }
-        index++;
-    }
-    return itemTable[0];
-}
-
 BOOL canHarvest(MCTool tool, MCItem block)
 {
     if (block.material != MCMaterialStone && block.material != MCMaterialIron && block.material != MCMaterialSnow && block.material != MCMaterialSnowBlock) {

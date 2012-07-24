@@ -10,62 +10,6 @@
 #import "MCSocket.h"
 #import "MCWorld.h"
 #import "NSData+UserAdditions.h"
-void MCSetBlockInSection(MCSection* section, MCBlockCoord relativecoord, MCBlock block)
-{
-    section->typedata[MCAnvilIndex(relativecoord)] = block.typedata;
-    section->addarray[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] = ( block.typedata & 0xF00 ) >> (__mod(relativecoord.x, 2) ? 8 : 4);
-    section->metadata[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] = ( block.metadata & 0x00F ) << (__mod(relativecoord.x, 2) ? 0 : 4);
-}
-
-MCBlock MCGetBlockInSection(MCSection* section, MCBlockCoord relativecoord)
-{
-    return (MCBlock)
-    {
-        (       section->typedata[MCAnvilIndex(relativecoord)]) + 
-        (((     (section->addarray[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] & (__mod(relativecoord.x, 2)  ? 0x0F : 0xF0)) >> (__mod(relativecoord.x, 2)  ? 0 : 4)) & 0x0F) << 8),
-        (       (section->metadata[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] & (__mod(relativecoord.x, 2)  ? 0x0F : 0xF0)) >> (__mod(relativecoord.x, 2)  ? 0 : 4)) & 0x0F, 
-        (       (section->lightarr[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] & (__mod(relativecoord.x, 2)  ? 0x0F : 0xF0)) >> (__mod(relativecoord.x, 2)  ? 0 : 4)) & 0x0F, 
-        (       (section->skylight[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] & (__mod(relativecoord.x, 2)  ? 0x0F : 0xF0)) >> (__mod(relativecoord.x, 2)  ? 0 : 4)) & 0x0F, 
-    };
-}
-
-MCBlockCoord absoluteCoordToSectionRelative(MCBlockCoord orig)
-{
-    register int x = orig.x;
-    register int y = orig.y;
-    register int z = orig.z;
-    register int modx = __mod(x, 16);
-    register int mody = __mod(y, 16);
-    register int modz = __mod(z, 16);
-    return MCBlockCoordMake(modx,mody,modz);
-}
-
-MCBlockCoord entityCoordToChunkSectionCoord(MCBlockCoord orig)
-{
-    register int x = orig.x;
-    register int y = orig.y;
-    register int z = orig.z;/*
-                             register int modx = __mod(x, 16);
-                             register int mody = __mod(y, 16);
-                             register int modz = __mod(z, 16);
-                             x -= modx;
-                             y -= mody;
-                             z -= modz;*/
-    return MCBlockCoordMake(x/16,y/16,z/16);
-}
-
-MCChunkCoord chunkCoordForEntityCoord(MCCoord orig)
-{
-    register int x = orig.x;
-    register int z = orig.z;/*
-                             register int modx = __mod(x, 16);
-                             register int mody = __mod(y, 16);
-                             register int modz = __mod(z, 16);
-                             x -= modx;
-                             y -= mody;
-                             z -= modz;*/
-    return MCChunkCoordMake(x/16, z/16);
-}
 
 NSString* MCBiomeToNSString(MCBiome biome)
 {
@@ -143,26 +87,29 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                 }
                 vertexData = malloc(scts * 16 * 16 * 16 * sizeof(struct MCVertex) * 12);
                 vertexSize = 0;
+                int px = [[[world socket] player] x];
+                int py = [[[world socket] player] y];
+                int pz = [[[world socket] player] z];
                 for (int section = 0; section < 16; section++) {
                     if ((sections_bitmask >> section) & 0x1) {
+                        MCSection* sct = sections[section];
                         for (int cx = 0; cx < 16; cx++) {
-                            int rx = (x * 16) + cx;
+                            int rx = (x * 16) + cx - px;
                             for (int cy = 0; cy < 16; cy++) {
-                                int ry = (section * 16) + cy;
+                                int ry = (section * 16) + cy - py;
                                 for (int cz = 0; cz < 16; cz++) {
-                                    int rz = (z * 16) + cz;
-#define sct sections[section]
-                                    unsigned char btype  = sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy,cz}))];
-                                    unsigned char btype2 = (cy)         ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy-1,cz}))] : 1;
-                                    unsigned char btype3 = (cy < 16)    ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy+1,cz}))] : 1;
-                                    unsigned char btype4 = (cx)         ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx-1,cy,cz}))] : 1;
-                                    unsigned char btype5 = (cx < 16)    ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx+1,cy,cz}))] : 1;
-                                    unsigned char btype6 = (cz)         ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy,cz-1}))] : 1;
-                                    unsigned char btype7 = (cz < 16)    ? sct->typedata[MCAnvilIndex(((MCRelativeCoord){cx,cy,cz+1}))] : 1;
-                                    if (btype) {
+                                    int rz = (z * 16) + cz - pz;
+                                    MCBlock blck =  MCGetBlockInSection(sct, (MCRelativeCoord){cx, cy, cz});
+                                    MCBlock blck1 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy+1,cz});
+                                    MCBlock blck2 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy-1,cz});
+                                    MCBlock blck3 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy,cz+1});
+                                    MCBlock blck4 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy,cz-1});
+                                    MCBlock blck5 = MCGetBlockInSection(sct, (MCRelativeCoord){cx+1,cy,cz});
+                                    MCBlock blck6 = MCGetBlockInSection(sct, (MCRelativeCoord){cx-1,cy,cz});
+                                    if (getItem(blck.typedata, 0).value == blck.typedata && blck.typedata) {
 #define tmpvx vertexData
 #define verts vertexSize
-                                        if (!btype2) {
+                                        if (!getItem(blck2.typedata, 0).value == blck2.typedata && blck2.typedata) {
                                             /* x=M z=N y=0 face */
                                             tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 0+rz};
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
@@ -171,9 +118,9 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 1+rz};
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
                                         }
-                                        if (!btype3) {
+                                        if (!getItem(blck1.typedata, 0).value == blck1.typedata && blck1.typedata) {
                                             /* x=M z=N y=1 face */
-                                            //NSLog(@"type is %@[%d] [%d|%d|%d]", getItem(btype, 0).name, btype, rx, ry, rz);
+                                            NSLog(@"%@", getItem(blck.typedata, blck.metadata).name);
                                             tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 0+rz};
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 0+rz};
                                             tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 1+rz};
@@ -181,7 +128,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 1+rz};
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 0+rz};
                                         }
-                                        if (!btype4) {
+                                        if (!getItem(blck6.typedata, 0).value == blck6.typedata && blck6.typedata) {
                                             /* x=0 z=N y=M face */
                                             tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 0+rz};
                                             tmpvx[verts++] = (struct MCVertex){0+rx, 1+ry, 0+rz};
@@ -190,7 +137,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                             tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 0+rz};
                                             tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 1+rz};
                                         }
-                                        if (!btype5) {
+                                        if (!getItem(blck5.typedata, 0).value == blck5.typedata && blck5.typedata) {
                                             /* x=1 z=N y=M face */
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 0+rz};
@@ -199,7 +146,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 1+rz};
                                         }
-                                        if (!btype6) {
+                                        if (!getItem(blck4.typedata, 0).value == blck4.typedata && blck4.typedata) {
                                             /* x=N z=0 y=M face */
                                             tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 0+rz};
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
@@ -208,7 +155,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 1+ry, 0+rz};
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 0+rz};
                                         }
-                                        if (!btype7) {
+                                        if (!getItem(blck3.typedata, 0).value == blck3.typedata && blck3.typedata) {
                                             /* x=N z=1 y=M face */
                                             tmpvx[verts++] = (struct MCVertex){0+rx, 0+ry, 1+rz};
                                             tmpvx[verts++] = (struct MCVertex){1+rx, 0+ry, 1+rz};
@@ -322,7 +269,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                             [self allocateSection:i];
                         }
                         if ((add >> i ) & 0x1) {
-                            if (rpoint+sizeof(MCSection) > [dt length]) {
+                            if (rpoint+4096+2048+2048+2048+2048 > [dt length]) {
                                 NSLog(@"[Critical] [%s:%d] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.", __FILE__, __LINE__);
                                 dispatch_async(dispatch_get_main_queue(), ^(void){
                                     [[world socket] disconnectWithReason:@"Chunk Error"];                 
@@ -332,10 +279,10 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                 isUpdating = NO;
                                 return;
                             }
-                            memcpy(sections[i], (char*)(int)[dt bytes]+(rpoint), sizeof(MCSection));
-                            rpoint += sizeof(MCSection);
+                            memcpy(sections[i], (char*)((char*)[dt bytes]+(rpoint)), 4096+2048+2048+2048+2048);
+                            rpoint += 4096+2048+2048+2048+2048;
                         } else {
-                            if (rpoint+sizeof(MCSection)-2048 > [dt length]) {
+                            if (rpoint+4096+2048+2048+2048 > [dt length]) {
                                 NSLog(@"[Critical] [%s:%d] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.", __FILE__, __LINE__);
                                 dispatch_async(dispatch_get_main_queue(), ^(void){
                                     [[world socket] disconnectWithReason:@"Chunk Error"];                 
@@ -346,8 +293,8 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                 return;
                             }
                             bzero(sections[i]->addarray, 2048);
-                            memcpy(sections[i], (char*)(int)[dt bytes]+(rpoint), sizeof(MCSection)-2048);
-                            rpoint += sizeof(MCSection)-2048;
+                            memcpy(sections[i], (char*)((char*)[dt bytes]+(rpoint)), 4096+2048+2048+2048);
+                            rpoint += 4096+2048+2048+2048;
                         }
                     }
                 }
@@ -391,7 +338,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                     char yrelcoord = abs(ycoord) % 16;
                     char ysection = ycoord / 16;
                     MCSection* sc = [self allocateSection:ysection];
-                    MCSetBlockInSection(sc, MCBlockCoordMake(xcoord, yrelcoord, zcoord), ((MCBlock){blockid, metadata, 0, 0}));
+                    MCSetBlockInSection(sc, (MCRelativeCoord){xcoord, yrelcoord, zcoord}, ((MCBlock){blockid, metadata, 0, 0}));
                     rpoint += 4;
                 }
             }

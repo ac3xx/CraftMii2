@@ -17,7 +17,7 @@
 #import "MCLoginView4iPadViewController.h"
 
 @implementation MCLoginView
-@synthesize masterController;
+@synthesize masterController, sock;
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
@@ -208,7 +208,7 @@
         [[self navigationController] popToViewController:self  animated:NO];
         [[self navigationController] dismissModalViewControllerAnimated:NO];
         game = nil;
-        sock = nil;
+        self.sock = nil;
         [server becomeFirstResponder];
         NSLog(@"D/C'd :(");
     }
@@ -223,7 +223,7 @@
 {
     auth = [MCAuth authWithUsername:[user text] andPassword:[pass text]];
     [auth login];
-    sock = [[[MCSocket alloc] initWithServer:[server text] andAuth:auth] autorelease];
+    self.sock = [[[MCSocket alloc] initWithServer:[server text] andAuth:auth] autorelease];
     [sock setDelegate:self];
     [sock connect];
 }
@@ -332,6 +332,12 @@
      [self.navigationController pushViewController:detailViewController animated:YES];
      [detailViewController release];
      */
+}
+
+- (void)dealloc
+{
+    self.sock = nil;
+    [super dealloc];
 }
 
 @end

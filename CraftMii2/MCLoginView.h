@@ -21,6 +21,7 @@
     MCViewController* game;
     MCLoginView4iPadViewController* masterController;
 }
+@property(retain) MCSocket* sock;
 @property(retain) MCLoginView4iPadViewController* masterController;
 -(void)login:(id)sender;
 -(void)selectedServer:(NSArray*)server;

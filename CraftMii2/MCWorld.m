@@ -140,7 +140,7 @@
                 return;
             }
         }
-        MCSetBlockInSection(sct, MCBlockCoordMake(SctRlX, SctRlY, SctRlZ), to);
+        MCSetBlockInSection(sct, (MCRelativeCoord){SctRlX, SctRlY, SctRlZ}, to);
         [chunk refresh];
     }
 }

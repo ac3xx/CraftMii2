@@ -50,24 +50,30 @@
 }
 - (size_t)read:(uint_fast8_t*)data maxLength:(NSUInteger)len
 {
-    if (len>(readbufpos-readbufreadpos)) {
-        len=(readbufpos-readbufreadpos);
+    @synchronized(self.delegate)
+    {
+        if (delegate && readbuf) {
+            if (len>(readbufpos-readbufreadpos)) {
+                len=(readbufpos-readbufreadpos);
+            }
+            if (len == 0)
+                return 0;
+            else if (len == 1) 
+                *data = *(readbuf+readbufreadpos);
+            else 
+                memcpy(data, (readbuf+readbufreadpos), len);
+            if (isRC4enabled) {
+                [self rc4:len buffer:(char*)data];
+            }
+            readbufreadpos+=len;
+            if (readbufpos == readbufreadpos) {
+                readbufpos = 0;
+                readbufreadpos = 0;
+            }
+            return len;
+        }
     }
-    if (len == 0)
-        return 0;
-    else if (len == 1) 
-        *data = *(readbuf+readbufreadpos);
-    else 
-        memcpy(data, (readbuf+readbufreadpos), len);
-    if (isRC4enabled) {
-        [self rc4:len buffer:(char*)data];
-    }
-    readbufreadpos+=len;
-    if (readbufpos == readbufreadpos) {
-        readbufpos = 0;
-        readbufreadpos = 0;
-    }
-    return len;
+    return 0;
 }
 - (size_t)_read:(uint_fast8_t*)data maxLength:(NSUInteger)len
 {

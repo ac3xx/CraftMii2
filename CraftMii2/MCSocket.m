@@ -181,7 +181,6 @@ static int currentIdentifier = 0;
         self.outputStream = nil;
         self.inputStream = nil;
         isInUse = NO;
-        [self autorelease];
     } else if ([packet identifier] == 0x01)
     {
         player = (MCPlayer*)[MCPlayer entityWithIdentifier:[[infoDict objectForKey:@"EntityID"] intValue]];
@@ -334,8 +333,7 @@ static int currentIdentifier = 0;
 }*/
 -(void)dealloc
 {
-    [self retain];
-    [self disconnectWithReason:@"Socket Released"];
+    //[self disconnectWithReason:@"Socket Deallocated"];
     currentIdentifier--;
     free((void*)[self dataBuffer]);
     free((void*)[self metadataArea]);
