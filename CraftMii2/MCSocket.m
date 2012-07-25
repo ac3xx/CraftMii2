@@ -99,6 +99,8 @@ static int currentIdentifier = 0;
     [outputStream open];
     NSInputStream* sin = (NSInputStream*)[MCStream streamWithStream:inputStream];
     NSOutputStream* sout = (NSOutputStream*)[MCStream streamWithStream:outputStream];
+    [(MCStream*)sin setSocket:self];
+    [(MCStream*)sout setSocket:self];
     [self setInputStream:sin];
     [self setOutputStream:sout];
     [inputStream setDelegate:self];

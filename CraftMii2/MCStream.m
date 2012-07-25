@@ -24,7 +24,7 @@
 #import "MCStream.h"
 #define RC4SWAP(x,y) {char __k=*(char*)x; *x=*(char*)y; *y=(char)__k;}
 @implementation MCStream
-@synthesize delegate, origStream, isRC4enabled, key;
+@synthesize delegate, origStream, isRC4enabled, key, socket;
 +(MCStream*)streamWithStream:(NSStream*)stream
 {
     //return stream;

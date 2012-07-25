@@ -177,12 +177,15 @@ static inline MCChunkCoord chunkCoordForEntityCoord(MCCoord orig)
     int vertexSize;
     BOOL isRendering;
     BOOL isUpdating;
+    BOOL hasToBeUpdated;
+    GLuint vbo;
 }
 @property(assign) int x;
 @property(assign) int z;
 @property(assign) MCWorld* world;
 @property(assign)  BOOL shouldBeRendered;
 @property(readonly) BOOL hasBeenRendered;
+@property(assign) GLuint vbo;
 -(struct MCVertex*)vertexData;
 -(int)vertexSize;
 -(void)updateChunk:(NSDictionary*)infoDict;

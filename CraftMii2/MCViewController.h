@@ -43,6 +43,8 @@
     struct MCVertex* vertexes;
     int verts;
     GLuint vbo;
+    char* vbz;
+    GLuint attribute_coord;
 }
 @property(retain) MCSocket* socket;
 

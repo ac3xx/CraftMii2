@@ -9,7 +9,7 @@
 // 
 
 #import <UIKit/UIKit.h>
-
+#import "MCSocket.h"
 @interface MCStream : NSObject <NSStreamDelegate>
 {
     id delegate;
@@ -23,11 +23,13 @@
     char* readbuf;
     int readbufpos;
     int readbufreadpos;
+    MCSocket* socket;
 }
 @property(retain) id delegate;
 @property(retain) NSStream* origStream;
 @property(assign) unsigned char* key;
 @property(assign) BOOL isRC4enabled;
+@property(assign) MCSocket* socket;
 + (MCStream*)streamWithStream:(NSStream*)stream;
 - (size_t)write:(uint_fast8_t*)data maxLength:(NSUInteger)len;
 - (size_t)read:(uint_fast8_t*)data maxLength:(NSUInteger)len;

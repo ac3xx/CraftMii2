@@ -11,6 +11,8 @@
 #import "MCWorld.h"
 #import "NSData+UserAdditions.h"
 
+static NSObject* buflock = nil;
+
 NSString* MCBiomeToNSString(MCBiome biome)
 {
     if (biome < __INTERNAL_MCBiomeEnumEnd) {
@@ -46,7 +48,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 };
 
 @implementation MCChunk
-@synthesize x,z,world;
+@synthesize x,z,world,vbo;
 
 - (BOOL)shouldBeRendered
 {
@@ -55,6 +57,19 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 
 - (void)setShouldBeRendered:(BOOL)shouldBeRendered_
 {
+    if (shouldBeRendered == YES) {
+        if (hasToBeUpdated == YES) {
+            return;
+        }
+    }
+    if (hasBeenRendered && !shouldBeRendered_)
+    {
+        glDeleteBuffers(1, &vbo);
+    }
+    else if (shouldBeRendered_ && !hasBeenRendered)
+    {
+        glGenBuffers(1, &vbo);
+    }
     hasBeenRendered = NO;
     if (shouldBeRendered_ == NO) {
         if (vertexData) {
@@ -87,18 +102,15 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                 }
                 vertexData = malloc(scts * 16 * 16 * 16 * sizeof(struct MCVertex) * 12);
                 vertexSize = 0;
-                int px = [[[world socket] player] x];
-                int py = [[[world socket] player] y];
-                int pz = [[[world socket] player] z];
                 for (int section = 0; section < 16; section++) {
                     if ((sections_bitmask >> section) & 0x1) {
                         MCSection* sct = sections[section];
                         for (int cx = 0; cx < 16; cx++) {
-                            int rx = (x * 16) + cx - px;
+                            int rx = (x * 16) + cx;
                             for (int cy = 0; cy < 16; cy++) {
-                                int ry = (section * 16) + cy - py;
+                                int ry = (section * 16) + cy;
                                 for (int cz = 0; cz < 16; cz++) {
-                                    int rz = (z * 16) + cz - pz;
+                                    int rz = (z * 16) + cz;
                                     MCBlock blck =  MCGetBlockInSection(sct, (MCRelativeCoord){cx, cy, cz});
                                     MCBlock blck1 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy+1,cz});
                                     MCBlock blck2 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy-1,cz});
@@ -172,6 +184,11 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                         }
                     }
                 }
+                @synchronized(buflock)
+                {
+                    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+                    glBufferData(GL_ARRAY_BUFFER, verts*3, tmpvx, GL_STATIC_DRAW);
+                }
                 hasBeenRendered = YES;
                 isRendering = NO;
             }
@@ -223,7 +240,15 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 {
     return entityCoordToChunkSectionCoord(orig);
 }
-
+-(id)init
+{
+    if ((self = [super init])) {
+        if (!buflock) {
+            buflock = [NSObject new];
+        }
+    }
+    return self;
+}
 -(void)updateChunk:(NSDictionary*)infoDict
 {
     isUpdating = YES;
@@ -351,9 +376,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 
 -(void)refresh
 {
-    if ([self shouldBeRendered]) {
-        [self setShouldBeRendered:YES];
-    }
+    hasToBeUpdated = YES;
 }
 
 -(MCSection*)allocateSection:(char)index

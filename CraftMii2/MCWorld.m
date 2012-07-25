@@ -97,9 +97,6 @@
         int ChunkZ = coord.z      / 16;
         MCChunk* chunk = [self chunkAtCoord:MCChunkCoordMake(ChunkX, ChunkZ) allocate:NO];
         MCSection* sct = [chunk sectionForYRel:ChunkY];
-        if (!sct) {
-            return NULL;
-        }
         return sct;
     }
 }

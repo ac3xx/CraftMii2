@@ -51,24 +51,27 @@
 }
 -(BOOL)tick
 {
-    if (pos && [stream streamStatus] == NSStreamStatusOpen) {
-        int rly_written = 0;
-        while (rly_written<pos) {
-            errno = 0;
-            int pass = [stream write:(unsigned char*)(buf+rly_written) maxLength:(pos-rly_written)];
-            if (errno) {
-                return NO;
+    @synchronized(self.socket)
+    {
+        if (pos && [stream streamStatus] == NSStreamStatusOpen) {
+            int rly_written = 0;
+            while (rly_written<pos) {
+                errno = 0;
+                int pass = [stream write:(unsigned char*)(buf+rly_written) maxLength:(pos-rly_written)];
+                if (errno ) {
+                    return NO;
+                }
+                if (pass >= -1) {
+                    rly_written += pass;
+                } else {
+                    return NO;
+                }
             }
-            if (pass >= -1) {
-                rly_written += pass;
-            } else {
-                return NO;
-            }
+            pos = 0;
+            return YES;
         }
-        pos = 0;
-        return YES;
+        return NO;
     }
-    return NO;
 }
 -(oneway void)dealloc
 {

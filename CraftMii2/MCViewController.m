@@ -121,6 +121,7 @@ GLfloat gCubeVertexData[216] =
 
 - (void)dealloc
 {
+    free(vbz);
     [socket release];
     [_context release];
     [_effect release];
@@ -159,7 +160,7 @@ GLfloat gCubeVertexData[216] =
     [super viewDidLoad];
     
     self.context = [[[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2] autorelease];
-
+    
     if (!self.context) {
         NSLog(@"Failed to create ES context");
     }
@@ -387,26 +388,26 @@ GLfloat gCubeVertexData[216] =
 - (void)setupGL
 {
     
-    [self updateChunks];
-/*
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
-
-    glGenVertexArraysOES(1, &_vertexArray);
-    glBindVertexArrayOES(_vertexArray);
-    
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, verts*sizeof(struct MCVertex), vertexes, GL_DYNAMIC_DRAW);
-    
-    glEnableVertexAttribArray(GLKVertexAttribPosition);
-    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(0));
-    glEnableVertexAttribArray(GLKVertexAttribNormal);
-    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
-    
-    glBindVertexArrayOES(0);*/
+    //[self updateChunks];
+    /*
+     glEnable(GL_DEPTH_TEST);
+     glEnable(GL_TEXTURE_2D);
+     glEnable(GL_BLEND);
+     glEnable(GL_CULL_FACE);
+     
+     glGenVertexArraysOES(1, &_vertexArray);
+     glBindVertexArrayOES(_vertexArray);
+     
+     glGenBuffers(1, &_vertexBuffer);
+     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+     glBufferData(GL_ARRAY_BUFFER, verts*sizeof(struct MCVertex), vertexes, GL_DYNAMIC_DRAW);
+     
+     glEnableVertexAttribArray(GLKVertexAttribPosition);
+     glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(0));
+     glEnableVertexAttribArray(GLKVertexAttribNormal);
+     glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
+     
+     glBindVertexArrayOES(0);*/
     [EAGLContext setCurrentContext:self.context];
     
     [self loadShaders];
@@ -414,23 +415,11 @@ GLfloat gCubeVertexData[216] =
     self.effect = [[[GLKBaseEffect alloc] init] autorelease];
     self.effect.light0.enabled = GL_TRUE;
     self.effect.light0.diffuseColor = GLKVector4Make(1.0f, 0.4f, 0.4f, 1.0f);
+    glEnable(GL_CULL_FACE);
+    //glBufferData(GL_ARRAY_BUFFER, vbd, vbz, GL_STATIC_DRAW);
     
-    glEnable(GL_DEPTH_TEST);
-    
-    glGenVertexArraysOES(1, &_vertexArray);
-    glBindVertexArrayOES(_vertexArray);
-    
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(gCubeVertexData), gCubeVertexData, GL_STATIC_DRAW);
-    
-    glEnableVertexAttribArray(GLKVertexAttribPosition);
-    glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(0));
-    glEnableVertexAttribArray(GLKVertexAttribNormal);
-    glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_FLOAT, GL_FALSE, 24, BUFFER_OFFSET(12));
-    
-    glBindVertexArrayOES(0);
-
+    //glEnableVertexAttribArray(GLKVertexAttribNormal);
+    //glVertexAttribPointer(GLKVertexAttribNormal, 3, GL_BYTE, GL_FALSE, 24, BUFFER_OFFSET(12));    
 }
 
 - (void)tearDownGL
@@ -464,44 +453,48 @@ GLfloat gCubeVertexData[216] =
 
 - (void)updateChunks
 {
-    if (socket) {
-        int chunk_view_distance = 3;
-        //int pl = chunk_view_distance * 2 + 1;
-        //int i = 0;
-        int ccx = [[socket player] x] / 16;
-        int ccz = [[socket player] z] / 16;
-        id world = [socket world];
-        int tz = 0;
-        verts = 0;
-        NSMutableArray* drawn = [[NSMutableArray alloc] initWithCapacity:[[world chunkPool] count]];
-        for (int cx = -chunk_view_distance; cx < chunk_view_distance; cx++) {
-            int crx = ccx + cx;
-            for (int cz = -chunk_view_distance; cz < chunk_view_distance; cz++) {
-                int crz = ccz + cz;
-                MCChunk * chk = [world chunkAtCoord:MCChunkCoordMake(crx, crz) allocate:NO];
-                if (chk) {
-                    [drawn addObject:chk];
-                    if([chk hasBeenRendered])
-                    {
-                        //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-                        //glBufferData(GL_ARRAY_BUFFER, [chk vertexSize]*3, [chk vertexData], GL_STATIC_DRAW);
-                        tz += [chk vertexSize];
-                        // Should actually draw eet, but it hangs _everytheeeng_
-                    } else {
-                        [chk setShouldBeRendered:YES];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(){
+        @synchronized([socket world])
+        {
+            if (socket) {
+                int chunk_view_distance = 3;
+                //int pl = chunk_view_distance * 2 + 1;
+                //int i = 0;
+                int ccx = [[socket player] x] / 16;
+                int ccz = [[socket player] z] / 16;
+                id world = [socket world];
+                verts = 0;
+                NSMutableArray* drawn = [[NSMutableArray alloc] initWithCapacity:[[world chunkPool] count]];
+                for (int cx = -chunk_view_distance; cx < chunk_view_distance; cx++) {
+                    int crx = ccx + cx;
+                    for (int cz = -chunk_view_distance; cz < chunk_view_distance; cz++) {
+                        int crz = ccz + cz;
+                        MCChunk * chk = [world chunkAtCoord:MCChunkCoordMake(crx, crz) allocate:NO];
+                        if (chk) {
+                            [drawn addObject:chk];
+                            // ergh, this used to be something useful. i am 12 and wat is dis
+                            if ([chk vbo]) {
+                                glBindBuffer(GL_ARRAY_BUFFER, [chk vbo]);
+                                glVertexAttribPointer(ATTRIB_VERTEX, 4, GL_BYTE, GL_FALSE, 0, 0);
+                                glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
+                                glDrawArrays(GL_TRIANGLES, 0, [chk vertexSize]);
+                            }
+                            [chk setShouldBeRendered:YES];
+                        }
                     }
                 }
+            draw:
+                // FUK U
+                for (id key in [world chunkPool]) {
+                    id obj = [[world chunkPool] objectForKey:key];
+                    if (![drawn containsObject:obj]) {
+                        [obj setShouldBeRendered:NO];
+                    }
+                }
+                [drawn release];
             }
         }
-        for (id key in [world chunkPool]) {
-            id obj = [[world chunkPool] objectForKey:key];
-            if (![drawn containsObject:obj]) {
-                [obj setShouldBeRendered:NO];
-            }
-        }
-        [drawn release];
-        //glDrawArrays(GL_TRIANGLES, 0, tz);
-    }
+    });
 }
 
 - (void)chunkDidUpdate:(MCChunk *)chunk
@@ -518,47 +511,45 @@ GLfloat gCubeVertexData[216] =
             [self updateChunks];
             lastChunkCoord = MCChunkCoordMake(socket.player.x/16, socket.player.z/16);
         }
-    }
+    
+    */
+    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
-    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, 0.1f, 1500.0f);
-    self.effect.transform.projectionMatrix = projectionMatrix;
-    
-    GLKMatrix4 baseModelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
-    baseModelViewMatrix = GLKMatrix4Rotate(baseModelViewMatrix, _rotation, 0.0f, 1.0f, 0.0f);
-    
-    // Compute the model view matrix for the object rendered with GLKit
-    GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -1.5f);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 1.0f, 1.0f, 1.0f);
-    modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
-    
-    self.effect.transform.modelviewMatrix = modelViewMatrix;
-    
-    // Compute the model view matrix for the object rendered with ES2
-    modelViewMatrix = GLKMatrix4MakeTranslation(socket.player.x, socket.player.y, socket.player.z);
-    modelViewMatrix = GLKMatrix4Rotate(modelViewMatrix, _rotation, 1.0f, 1.0f, 1.0f);
-    modelViewMatrix = GLKMatrix4Scale(modelViewMatrix, 10.0f, 10.0f, 10.0f);
-    modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
-    _normalMatrix = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(modelViewMatrix), NULL);
-    
-    _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
-    _rotation += self.timeSinceLastUpdate * 0.5f;*/
+     GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, 0.1f, 15.0f);
+     self.effect.transform.projectionMatrix = projectionMatrix;
+     
+     GLKMatrix4 baseModelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -4.0f);
+     baseModelViewMatrix = GLKMatrix4Rotate(baseModelViewMatrix, 0.0f, 0.0f, 1.0f, 0.0f);
+     
+     GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -1.5f);    
+     // Compute the model view matrix for the object rendered with ES2
+     modelViewMatrix = GLKMatrix4MakeTranslation(socket.player.x, socket.player.y, socket.player.z);
+    GLKMatrix4RotateZ(modelViewMatrix, DEG2RAD([[socket player] yaw]));
+    GLKMatrix4RotateY(modelViewMatrix, DEG2RAD([[socket player] pitch]));
+     //modelViewMatrix = GLKMatrix4Multiply(baseModelViewMatrix, modelViewMatrix);
+     _normalMatrix = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(modelViewMatrix), NULL);
+     
+     _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
-    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+    /*
     glBindVertexArrayOES(_vertexArray);
     
     // Render the object with GLKit
     [self.effect prepareToDraw];
     
+    glDrawArrays(GL_TRIANGLES, 0, 36);
     
     // Render the object again with ES2
     glUseProgram(_program);
-    glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
+    
     glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, _normalMatrix.m);
+    
+    glDrawArrays(GL_TRIANGLES, 0, 36);*/
 }
 
 #pragma mark -  OpenGL ES 2 shader compilation
@@ -593,9 +584,8 @@ GLfloat gCubeVertexData[216] =
     
     // Bind attribute locations.
     // This needs to be done prior to linking.
-    glBindAttribLocation(_program, ATTRIB_VERTEX, "position");
+    glBindAttribLocation(_program, ATTRIB_VERTEX, "coord");
     glBindAttribLocation(_program, ATTRIB_NORMAL, "normal");
-    
     // Link program.
     if (![self linkProgram:_program]) {
         NSLog(@"Failed to link program: %d", _program);
@@ -628,8 +618,8 @@ GLfloat gCubeVertexData[216] =
     if (fragShader) {
         glDetachShader(_program, fragShader);
         glDeleteShader(fragShader);
-    }
-    
+    }    
+
     return YES;
 }
 
