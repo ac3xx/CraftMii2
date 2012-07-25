@@ -8,7 +8,7 @@
 
 #import "MCAuth.h"
 @interface NSData (SHA1)
--(NSString*)sha1DigestString;
+- (NSString*)sha1DigestString;
 - (NSData*)encryptWithPublicKey:(NSData*)pubKey;
 @end
 @class MCSocket;

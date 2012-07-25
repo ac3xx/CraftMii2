@@ -164,9 +164,7 @@
 }
 - (void)dealloc
 {
-    for (MCChunk* chunk in chunkPool) {
-        [chunk release];
-    }
+    [chunkPool removeAllObjects];
     [self setChunkPool:nil];
     [super dealloc];
 }

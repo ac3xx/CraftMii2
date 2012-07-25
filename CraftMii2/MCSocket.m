@@ -27,9 +27,7 @@ static int currentIdentifier = 0;
 @synthesize inputStream, outputStream, auth, player, server, delegate, buffer, dataBuffer, metadataArea, outputBuffer, ticks, identifier, world, isConnected;
 -(MCSocket*)initWithServer:(NSString*)iserver andAuth:(MCAuth*)iauth
 {
-    NSLog(@"ID: %d", currentIdentifier);
     [self setIdentifier:currentIdentifier++];
-    NSLog(@"ID: %d", currentIdentifier);
     [self setAuth:iauth];
     [self setServer:iserver];
     [self setWorld:[[MCWorld new] autorelease]];
@@ -277,11 +275,7 @@ static int currentIdentifier = 0;
 	switch (streamEvent) {
         case NSStreamEventErrorOccurred:
         {
-            if (errno) {
-                [self disconnectWithReason:[NSString stringWithUTF8String:strerror(errno)]];
-                return;
-            }
-            [self disconnectWithReason:@"Stream error"];
+            [self disconnectWithReason:[[theStream streamError] localizedDescription]];
             break;
         }
         case NSStreamEventEndEncountered:

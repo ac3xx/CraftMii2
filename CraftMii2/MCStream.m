@@ -127,9 +127,11 @@
             readbufreadpos=0;
         }
         if (RBUFSIZE-readbufpos) {
-            @synchronized(self)
+            @synchronized(self.socket)
             {
-                readbufpos += [self _read:(uint_fast8_t*)(readbuf+readbufpos) maxLength:(RBUFSIZE-readbufpos)];
+                if ([theStream streamStatus] == NSStreamStatusOpen) {
+                    readbufpos += [self _read:(uint_fast8_t*)(readbuf+readbufpos) maxLength:(RBUFSIZE-readbufpos)];
+                }
                 while (readbufreadpos - readbufpos) {
                     [delegate stream:(NSStream*)self handleEvent:streamEvent];
                 }

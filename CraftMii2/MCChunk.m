@@ -305,8 +305,16 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                 isUpdating = NO;
                                 return;
                             }
-                            memcpy(sections[i], (char*)((char*)[dt bytes]+(rpoint)), 4096+2048+2048+2048+2048);
-                            rpoint += 4096+2048+2048+2048+2048;
+                            short cnt = 0;
+                            while (cnt-4096) {
+                                *(char*)(((char*)sections[i])+cnt) = *((char*)[dt bytes]+(rpoint));
+                                if(*(char*)(((char*)sections[i])+cnt))
+                                    sections[i]->blk++;
+                                rpoint++;
+                                cnt++;
+                            }
+                            memcpy((((char*)(sections[i]))+4096), (char*)((char*)[dt bytes]+(rpoint)), 2048+2048+2048+2048);
+                            rpoint += 2048+2048+2048+2048;
                         } else {
                             if (rpoint+4096+2048+2048+2048 > [dt length]) {
                                 NSLog(@"[Critical] [%s:%d] Size of chunk data is wrong. Either the world is corrupt or the server's implementation of chunk updates is wrong. Disconnecting.", __FILE__, __LINE__);
@@ -319,16 +327,15 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                 return;
                             }
                             bzero(sections[i]->addarray, 2048);
-                            short cnt = 4096;
-                            while (cnt--) {
+                            short cnt = 0;
+                            while (cnt-4096) {
                                 *(char*)(((char*)sections[i])+cnt) = *((char*)[dt bytes]+(rpoint));
                                 if(*(char*)(((char*)sections[i])+cnt))
                                     sections[i]->blk++;
-                                else 
-                                    sections[i]->blk--;
                                 rpoint++;
+                                cnt++;
                             }
-                            memcpy(sections[i], (char*)((char*)[dt bytes]+(rpoint)), 2048+2048+2048);
+                            memcpy((((char*)sections[i])+4096), (char*)((char*)[dt bytes]+(rpoint)), 2048+2048+2048);
                             rpoint += 2048+2048+2048;
                         }
                     }
@@ -394,7 +401,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                            for (int i = 0; i < 16; i++) {
                                if (((sections_bitmask >> i ) & 0x1)) {
                                    if (sections[i]) {
-                                       if (!sections[i]->blk) {
+                                       if ((sections[i]->blk) == 0) {
                                            pr++;
                                            sections_bitmask -= 1 << i;
                                            free(sections[i]);

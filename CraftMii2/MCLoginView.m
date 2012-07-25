@@ -40,6 +40,37 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    server = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 40)];
+    server.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+    server.keyboardAppearance = UIKeyboardAppearanceAlert;
+    server.returnKeyType = UIReturnKeyNext;
+    server.autocorrectionType = UITextAutocorrectionTypeNo;
+    server.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    server.keyboardType = UIKeyboardTypeURL;
+    server.delegate = self;
+    server.clearButtonMode = UITextFieldViewModeWhileEditing;
+    //server.text = @"176.31.64.248";
+    [server becomeFirstResponder];
+    server.tag=1;
+    user = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 40)];
+    user.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+    user.keyboardAppearance = UIKeyboardAppearanceAlert;
+    user.returnKeyType = UIReturnKeyNext;
+    user.autocorrectionType = UITextAutocorrectionTypeNo;
+    user.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    user.tag=2;
+    user.delegate = self;
+    //user.text = @"Test";
+    pass = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 40)];
+    pass.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+    pass.keyboardAppearance = UIKeyboardAppearanceAlert;
+    pass.returnKeyType = UIReturnKeyGo;
+    pass.autocorrectionType = UITextAutocorrectionTypeNo;
+    pass.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    pass.tag=3;
+    pass.secureTextEntry = YES;
+    pass.delegate = self;
+    [self selectedServer:[[NSUserDefaults standardUserDefaults] objectForKey:@"iPhoneCachedInfos"]];
     self.navigationItem.title = @"Welcome to CraftMii!";
     self.navigationItem.prompt = @"Enter server and login info below to play";
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
@@ -88,37 +119,6 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    server = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 40)];
-    server.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    server.keyboardAppearance = UIKeyboardAppearanceAlert;
-    server.returnKeyType = UIReturnKeyNext;
-    server.autocorrectionType = UITextAutocorrectionTypeNo;
-    server.autocapitalizationType = UITextAutocapitalizationTypeNone;
-    server.keyboardType = UIKeyboardTypeURL;
-    server.delegate = self;
-    server.clearButtonMode = UITextFieldViewModeWhileEditing;
-    //server.text = @"176.31.64.248";
-    [server becomeFirstResponder];
-    server.tag=1;
-    user = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 40)];
-    user.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    user.keyboardAppearance = UIKeyboardAppearanceAlert;
-    user.returnKeyType = UIReturnKeyNext;
-    user.autocorrectionType = UITextAutocorrectionTypeNo;
-    user.autocapitalizationType = UITextAutocapitalizationTypeNone;
-    user.tag=2;
-    user.delegate = self;
-    //user.text = @"Test";
-    pass = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 40)];
-    pass.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-    pass.keyboardAppearance = UIKeyboardAppearanceAlert;
-    pass.returnKeyType = UIReturnKeyGo;
-    pass.autocorrectionType = UITextAutocorrectionTypeNo;
-    pass.autocapitalizationType = UITextAutocapitalizationTypeNone;
-    pass.tag=3;
-    pass.secureTextEntry = YES;
-    pass.delegate = self;
-    [self selectedServer:[[NSUserDefaults standardUserDefaults] objectForKey:@"iPhoneCachedInfos"]];
     [super viewWillAppear:animated];
 }
 
