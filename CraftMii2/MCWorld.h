@@ -28,4 +28,5 @@
 - (void)setBlock:(MCBlockCoord)coord to:(MCBlock)to;
 - (void)deallocateChunks;
 - (MCSection*)getSection:(MCBlockCoord)coord;
+- (void)purgeChunks;
 @end

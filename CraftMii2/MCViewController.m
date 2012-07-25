@@ -475,7 +475,7 @@ GLfloat gCubeVertexData[216] =
                             // ergh, this used to be something useful. i am 12 and wat is dis
                             if ([chk vbo]) {
                                 glBindBuffer(GL_ARRAY_BUFFER, [chk vbo]);
-                                glVertexAttribPointer(ATTRIB_VERTEX, 4, GL_BYTE, GL_FALSE, 0, 0);
+                                glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_BYTE, GL_FALSE, 0, [chk vertexData]);
                                 glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
                                 glDrawArrays(GL_TRIANGLES, 0, [chk vertexSize]);
                             }
@@ -585,7 +585,7 @@ GLfloat gCubeVertexData[216] =
     // Bind attribute locations.
     // This needs to be done prior to linking.
     glBindAttribLocation(_program, ATTRIB_VERTEX, "coord");
-    glBindAttribLocation(_program, ATTRIB_NORMAL, "normal");
+    //glBindAttribLocation(_program, ATTRIB_NORMAL, "normal");
     // Link program.
     if (![self linkProgram:_program]) {
         NSLog(@"Failed to link program: %d", _program);
@@ -608,7 +608,7 @@ GLfloat gCubeVertexData[216] =
     
     // Get uniform locations.
     uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = glGetUniformLocation(_program, "modelViewProjectionMatrix");
-    uniforms[UNIFORM_NORMAL_MATRIX] = glGetUniformLocation(_program, "normalMatrix");
+    //uniforms[UNIFORM_NORMAL_MATRIX] = glGetUniformLocation(_program, "normalMatrix");
     
     // Release vertex and fragment shaders.
     if (vertShader) {

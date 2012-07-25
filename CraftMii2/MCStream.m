@@ -19,7 +19,7 @@
  - (void)removeFromRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode;
  - (char*)getRC4streamUntil:(int)position writeToBuffer:(char*)buffer;
  - (void)stream:(NSStream *)theStream handleEvent:(NSStreamEvent)streamEvent;
-*/
+ */
 #define RBUFSIZE 51200
 #import "MCStream.h"
 #define RC4SWAP(x,y) {char __k=*(char*)x; *x=*(char*)y; *y=(char)__k;}
@@ -127,15 +127,13 @@
             readbufreadpos=0;
         }
         if (RBUFSIZE-readbufpos) {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0ul), ^(){
             @synchronized(self)
-                {
-                    readbufpos += [self _read:(uint_fast8_t*)(readbuf+readbufpos) maxLength:(RBUFSIZE-readbufpos)];
-                    while (readbufreadpos - readbufpos) {
-                        [delegate stream:(NSStream*)self handleEvent:streamEvent];
-                    }
+            {
+                readbufpos += [self _read:(uint_fast8_t*)(readbuf+readbufpos) maxLength:(RBUFSIZE-readbufpos)];
+                while (readbufreadpos - readbufpos) {
+                    [delegate stream:(NSStream*)self handleEvent:streamEvent];
                 }
-            });
+            }
             return;
         }
     }

@@ -57,11 +57,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 
 - (void)setShouldBeRendered:(BOOL)shouldBeRendered_
 {
-    if (shouldBeRendered == YES) {
-        if (hasToBeUpdated == YES) {
-            return;
-        }
-    }
+    hasToBeUpdated = NO;
     if (hasBeenRendered && !shouldBeRendered_)
     {
         glDeleteBuffers(1, &vbo);
@@ -78,6 +74,11 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
             vertexData = NULL;
         }
     } else {
+        if (shouldBeRendered == YES) {
+            if (hasToBeUpdated == NO) {
+                return;
+            }
+        }
         if (isUpdating) {
             return;
         }
@@ -111,13 +112,13 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                 int ry = (section * 16) + cy;
                                 for (int cz = 0; cz < 16; cz++) {
                                     int rz = (z * 16) + cz;
-                                    MCBlock blck =  MCGetBlockInSection(sct, (MCRelativeCoord){cx, cy, cz});
-                                    MCBlock blck1 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy+1,cz});
-                                    MCBlock blck2 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy-1,cz});
-                                    MCBlock blck3 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy,cz+1});
-                                    MCBlock blck4 = MCGetBlockInSection(sct, (MCRelativeCoord){cx,cy,cz-1});
-                                    MCBlock blck5 = MCGetBlockInSection(sct, (MCRelativeCoord){cx+1,cy,cz});
-                                    MCBlock blck6 = MCGetBlockInSection(sct, (MCRelativeCoord){cx-1,cy,cz});
+                                    MCBlock blck =  MCGetBlockInSection(self, sct, (MCRelativeCoord){cx, cy, cz});
+                                    MCBlock blck1 = MCGetBlockInSection(self, sct, (MCRelativeCoord){cx,cy+1,cz});
+                                    MCBlock blck2 = MCGetBlockInSection(self, sct, (MCRelativeCoord){cx,cy-1,cz});
+                                    MCBlock blck3 = MCGetBlockInSection(self, sct, (MCRelativeCoord){cx,cy,cz+1});
+                                    MCBlock blck4 = MCGetBlockInSection(self, sct, (MCRelativeCoord){cx,cy,cz-1});
+                                    MCBlock blck5 = MCGetBlockInSection(self, sct, (MCRelativeCoord){cx+1,cy,cz});
+                                    MCBlock blck6 = MCGetBlockInSection(self, sct, (MCRelativeCoord){cx-1,cy,cz});
                                     if (getItem(blck.typedata, 0).value == blck.typedata && blck.typedata) {
 #define tmpvx vertexData
 #define verts vertexSize
@@ -178,7 +179,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                         }
                                     }
 #undef sct
-
+                                    
                                 }
                             }
                         }
@@ -318,8 +319,17 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                                 return;
                             }
                             bzero(sections[i]->addarray, 2048);
-                            memcpy(sections[i], (char*)((char*)[dt bytes]+(rpoint)), 4096+2048+2048+2048);
-                            rpoint += 4096+2048+2048+2048;
+                            short cnt = 4096;
+                            while (cnt--) {
+                                *(char*)(((char*)sections[i])+cnt) = *((char*)[dt bytes]+(rpoint));
+                                if(*(char*)(((char*)sections[i])+cnt))
+                                    sections[i]->blk++;
+                                else 
+                                    sections[i]->blk--;
+                                rpoint++;
+                            }
+                            memcpy(sections[i], (char*)((char*)[dt bytes]+(rpoint)), 2048+2048+2048);
+                            rpoint += 2048+2048+2048;
                         }
                     }
                 }
@@ -363,7 +373,7 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                     char yrelcoord = abs(ycoord) % 16;
                     char ysection = ycoord / 16;
                     MCSection* sc = [self allocateSection:ysection];
-                    MCSetBlockInSection(sc, (MCRelativeCoord){xcoord, yrelcoord, zcoord}, ((MCBlock){blockid, metadata, 0, 0}));
+                    MCSetBlockInSection(self, sc, (MCRelativeCoord){xcoord, yrelcoord, zcoord}, ((MCBlock){blockid, metadata, 0, 0}));
                     rpoint += 4;
                 }
             }
@@ -372,6 +382,32 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
             [self refresh];
         }
     });
+}
+
+-(void)purge
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul), ^()
+                   {
+                       @synchronized(self)
+                       {
+                           int pr = 0;
+                           for (int i = 0; i < 16; i++) {
+                               if (((sections_bitmask >> i ) & 0x1)) {
+                                   if (sections[i]) {
+                                       if (!sections[i]->blk) {
+                                           pr++;
+                                           sections_bitmask -= 1 << i;
+                                           free(sections[i]);
+                                           sections[i] = NULL;
+                                       }
+                                   }
+                               }
+                           }
+                           if (pr != 0) {
+                               NSLog(@"Purged %d sections", pr);
+                           } 
+                       }
+                   });
 }
 
 -(void)refresh

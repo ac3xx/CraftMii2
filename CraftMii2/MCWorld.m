@@ -130,15 +130,28 @@
         int SctRlY = abs(coord.y) % 16;
         int SctRlZ = abs(coord.z) % 16;
         MCChunk* chunk = [self chunkAtCoord:MCChunkCoordMake(ChunkX, ChunkZ) allocate:YES];
-        MCSection* sct = [chunk sectionForYRel:ChunkY];
-        if (!sct) {
-            sct = [chunk allocateSection:ChunkY];
+        @synchronized(chunk)
+        {
+            MCSection* sct = [chunk sectionForYRel:ChunkY];
             if (!sct) {
-                return;
+                sct = [chunk allocateSection:ChunkY];
+                if (!sct) {
+                    return;
+                }
             }
+            MCSetBlockInSection(chunk, sct, (MCRelativeCoord){SctRlX, SctRlY, SctRlZ}, to);
         }
-        MCSetBlockInSection(sct, (MCRelativeCoord){SctRlX, SctRlY, SctRlZ}, to);
         [chunk refresh];
+    }
+}
+
+- (void)purgeChunks
+{
+    @synchronized(self)
+    {
+        for (id chk in chunkPool) {
+            [[chunkPool objectForKey:chk] purge];
+        }
     }
 }
 

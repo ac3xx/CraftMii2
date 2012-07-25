@@ -83,6 +83,7 @@ typedef struct MCSection
     unsigned char lightarr[16*16*8 ];
     unsigned char skylight[16*16*8 ];
     unsigned char addarray[16*16*8 ];
+    int blk;
 } MCSection;
 
 #define __mod(a,b) ((a < 0) ? -a % b : a % b)
@@ -105,25 +106,39 @@ typedef struct MCBlock
     unsigned char light;
     unsigned char skylight;
 } MCBlock;
-static inline void MCSetBlockInSection(MCSection* section, MCRelativeCoord relativecoord, MCBlock block)
+static inline void MCSetBlockInSection(MCChunk* chunk, MCSection* section, MCRelativeCoord relativecoord, MCBlock block)
 {
-    section->typedata[MCAnvilIndex(relativecoord)] = block.typedata;
-    section->addarray[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] = ( block.typedata & 0xF00 ) >> (__mod(relativecoord.x, 2) ? 8 : 4);
-    section->metadata[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] = ( block.metadata & 0x00F ) << (__mod(relativecoord.x, 2) ? 0 : 4);
+    @synchronized(chunk)
+    {
+        if (!section) {
+            return;
+        }
+        if (block.typedata == 0x0) {
+            section->blk--;
+        } else {
+            section->blk++;
+        }
+        section->typedata[MCAnvilIndex(relativecoord)] = block.typedata;
+        section->addarray[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] = ( block.typedata & 0xF00 ) >> (__mod(relativecoord.x, 2) ? 8 : 4);
+        section->metadata[__mod(relativecoord.x, 2) ? (MCAnvilIndex(relativecoord)-1)/2 : MCAnvilIndex(relativecoord)/2] = ( block.metadata & 0x00F ) << (__mod(relativecoord.x, 2) ? 0 : 4);
+    }
 }
 
-static inline MCBlock MCGetBlockInSection(MCSection* section, MCRelativeCoord relativecoord)
+static inline MCBlock MCGetBlockInSection(MCChunk* chunk, MCSection* section, MCRelativeCoord relativecoord)
 {
-    int aindex = MCAnvilIndex(relativecoord);
-    int nshift = (aindex & 1) * 4;
-    return (MCBlock)
+    @synchronized(chunk)
     {
-        (       (section->typedata[aindex])) + 
-        (       (section->addarray[aindex/2] << nshift) << 8),
-        (       (section->metadata[aindex/2] << nshift)     ),
-        (       (section->lightarr[aindex/2] << nshift)     ),
-        (       (section->skylight[aindex/2] << nshift)     ),
-    };
+        int aindex = MCAnvilIndex(relativecoord);
+        int nshift = (aindex & 1) * 4;
+        return (MCBlock)
+        {
+            (       (section->typedata[aindex])) + 
+            (       (section->addarray[aindex/2] << nshift) << 8),
+            (       (section->metadata[aindex/2] << nshift)     ),
+            (       (section->lightarr[aindex/2] << nshift)     ),
+            (       (section->skylight[aindex/2] << nshift)     ),
+        };
+    }
 }
 
 static inline MCBlockCoord absoluteCoordToSectionRelative(MCBlockCoord orig)
@@ -193,5 +208,6 @@ static inline MCChunkCoord chunkCoordForEntityCoord(MCCoord orig)
 -(MCSection*)sectionForYRel:(short)y;
 -(MCSection*)allocateSection:(char)index;
 -(void)refresh;
+-(void)purge;
 @end
 MCBlock getBlock(MCBlockCoord coord, MCSocket* socket);

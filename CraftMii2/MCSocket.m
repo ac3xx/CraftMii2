@@ -128,6 +128,7 @@ static int currentIdentifier = 0;
                                [NSNumber numberWithBool:    [[self player] onGround]] , @"On Ground",
                                nil];
             [[MCPlayerPositionLookPacket packetWithInfo:dicts] sendToSocket:self];
+            [world purgeChunks];
             ticks++;
         }
         [outputBuffer tick];
@@ -246,7 +247,7 @@ static int currentIdentifier = 0;
                 }
                 else if ([packet identifier] == 0x00)
                 {
-                    NSLog(@"%d", [world getBlock:MCBlockCoordMake(-228, 69, 200)].typedata);
+                    NSLog(@"Main thread is alive!");
                     lpingtick = ticks;
                     [[MCPingPacket packetWithInfo:infoDict] sendToSocket:self];
                 }
