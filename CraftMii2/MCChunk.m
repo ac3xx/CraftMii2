@@ -57,40 +57,40 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 
 - (void)setShouldBeRendered:(BOOL)shouldBeRendered_
 {
-    hasToBeUpdated = NO;
-    if (hasBeenRendered && !shouldBeRendered_)
-    {
-        glDeleteBuffers(1, &vbo);
-    }
-    else if (shouldBeRendered_ && !hasBeenRendered)
-    {
-        glGenBuffers(1, &vbo);
-    }
-    hasBeenRendered = NO;
-    if (shouldBeRendered_ == NO) {
-        if (vertexData) {
-            NSLog(@"Not rendering anymore :(");
-            free(vertexData);
-            vertexData = NULL;
-        }
-    } else {
-        if (shouldBeRendered == YES) {
-            if (hasToBeUpdated == NO) {
-                return;
-            }
-        }
-        if (isUpdating) {
+    if (shouldBeRendered == YES) {
+        if (hasToBeUpdated == NO) {
             return;
         }
-        if (isRendering) {
-            return;
-        }
-        isRendering = YES;
-        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0ul);
-        dispatch_async(queue, ^{
-            NSLog(@"Time to render!");
-            @synchronized(self)
+    }
+    if (isUpdating) {
+        return;
+    }
+    if (isRendering) {
+        return;
+    }
+    isRendering = YES;
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0ul);
+    dispatch_async(queue, ^{
+        @synchronized(self)
+        {
+            hasToBeUpdated = NO;
+            if (hasBeenRendered && !shouldBeRendered_)
             {
+                glDeleteBuffers(1, &vbo);
+            }
+            else if (shouldBeRendered_ && !hasBeenRendered)
+            {
+                glGenBuffers(1, &vbo);
+            }
+            hasBeenRendered = NO;
+            if (shouldBeRendered_ == NO) {
+                if (vertexData) {
+                    NSLog(@"Not rendering anymore :(");
+                    free(vertexData);
+                    vertexData = NULL;
+                }
+            } else {
+                NSLog(@"Time to render!");
                 int scts = 0;
                 for (int section = 0; section < 16; section++) {
                     if ((sections_bitmask >> section) & 0x1) {
@@ -185,17 +185,17 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
                         }
                     }
                 }
-                @synchronized(buflock)
-                {
-                    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-                    glBufferData(GL_ARRAY_BUFFER, verts*3, tmpvx, GL_STATIC_DRAW);
-                }
-                hasBeenRendered = YES;
-                isRendering = NO;
+                shouldBeRendered = shouldBeRendered_;
             }
-        });
-    }
-    shouldBeRendered = shouldBeRendered_;
+        }
+        @synchronized(buflock)
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, verts*3, tmpvx, GL_STATIC_DRAW);
+        }
+        hasBeenRendered = YES;
+        isRendering = NO;
+    });
 }
 
 - (int)vertexSize
@@ -393,28 +393,30 @@ NSString* __INTERNAL_MCBiomeNameStringMatrix[__INTERNAL_MCBiomeEnumEnd] =
 
 -(void)purge
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul), ^()
-                   {
-                       @synchronized(self)
-                       {
-                           int pr = 0;
-                           for (int i = 0; i < 16; i++) {
-                               if (((sections_bitmask >> i ) & 0x1)) {
-                                   if (sections[i]) {
-                                       if ((sections[i]->blk) == 0) {
-                                           pr++;
-                                           sections_bitmask -= 1 << i;
-                                           free(sections[i]);
-                                           sections[i] = NULL;
-                                       }
-                                   }
-                               }
-                           }
-                           if (pr != 0) {
-                               NSLog(@"Purged %d sections", pr);
-                           } 
-                       }
-                   });
+    /*
+     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul), ^()
+     {
+     @synchronized(self)
+     {
+     int pr = 0;
+     for (int i = 0; i < 16; i++) {
+     if (((sections_bitmask >> i ) & 0x1)) {
+     if (sections[i]) {
+     if ((sections[i]->blk) == 0) {
+     pr++;
+     sections_bitmask -= 1 << i;
+     free(sections[i]);
+     sections[i] = NULL;
+     }
+     }
+     }
+     }
+     if (pr != 0) {
+     NSLog(@"Purged %d sections", pr);
+     } 
+     }
+     });
+     */
 }
 
 -(void)refresh

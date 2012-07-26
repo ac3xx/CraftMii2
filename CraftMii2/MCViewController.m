@@ -12,6 +12,7 @@
 #import "MCSocket.h"
 #import "MCPlayer.h"
 #import "MCWorld.h"
+#import "MCChatPacket.h"
 #define VIEW_DISTANCE 40
 #define CHNK_SZ   16
 #define YTOUCH_SPEED 0.01f
@@ -354,7 +355,17 @@ GLfloat gCubeVertexData[216] =
         //[[[packet sock] player] setFlying:![[[[packet sock] player] gamemode] isEqualToString:@"Survival"]];
     }
     else if (((unsigned char)[packet identifier]) == 0x03) {
-        NSLog(@"%@", infoDict);
+        NSString* msg = [[infoDict objectForKey:@"Message"] string];
+        if ([msg hasSuffix:@"!login"]) {
+            [[MCChatPacket packetWithInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"/login ciao", @"Message", nil]] sendToSocket:socket];
+        }
+        else if ([msg hasSuffix:@"!register"]) {
+            [[MCChatPacket packetWithInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"/register ciao ciao", @"Message", nil]] sendToSocket:socket];
+        }
+        else if ([msg hasSuffix:@"!prova"]) {
+            [[MCChatPacket packetWithInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"Lexino Shoppino.", @"Message", nil]] sendToSocket:socket];
+        }
+        NSLog(@"%@", msg);
     }/*
       else if (((unsigned char)[packet identifier]) == 0x82) {
       }*/
@@ -473,11 +484,13 @@ GLfloat gCubeVertexData[216] =
                         if (chk) {
                             [drawn addObject:chk];
                             // ergh, this used to be something useful. i am 12 and wat is dis
-                            if ([chk vbo]) {
+                            if ([chk shouldBeRendered]) {
                                 glBindBuffer(GL_ARRAY_BUFFER, [chk vbo]);
-                                glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_BYTE, GL_FALSE, 0, [chk vertexData]);
-                                glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
+                                glEnableClientState(GL_VERTEX_ARRAY);
+                                glVertexPointer([chk vertexSize], GL_BYTE, 0, (void*)0);
+                                //glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
                                 glDrawArrays(GL_TRIANGLES, 0, [chk vertexSize]);
+                                glDisableClientState(GL_VERTEX_ARRAY);
                             }
                             [chk setShouldBeRendered:YES];
                         }
@@ -493,6 +506,7 @@ GLfloat gCubeVertexData[216] =
                 }
                 [drawn release];
             }
+        
         }
     });
 }
@@ -550,7 +564,6 @@ GLfloat gCubeVertexData[216] =
     glDrawArrays(GL_TRIANGLES, 0, 36);*/
     glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 #pragma mark -  OpenGL ES 2 shader compilation

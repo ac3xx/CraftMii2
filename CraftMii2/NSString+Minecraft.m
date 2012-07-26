@@ -15,9 +15,12 @@
     if (!(string&&OSSwapInt16(string->len))) {
         return nil;
     }
-    NSData* data = [[NSData alloc] initWithBytes:string->data length:OSSwapInt16(string->len)*2];
-    id ret = [[NSString alloc] initWithData:data encoding:NSUTF16BigEndianStringEncoding];
-    [data release];
+    int i = 0;
+    while (i < OSSwapInt16(string->len)) {
+        *((short*)((char*)(string->data) + i*2)) = OSSwapInt16(*((short*)((char*)(string->data) + i*2)));
+        i++;
+    }
+    id ret = [[NSString alloc] initWithCharacters:(unichar*)string->data length:OSSwapInt16(string->len)];
     return [ret autorelease];
 }
 -(m_char_t*) minecraftString
