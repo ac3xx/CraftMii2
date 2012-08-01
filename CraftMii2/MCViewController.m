@@ -465,50 +465,56 @@ GLfloat gCubeVertexData[216] =
 - (void)updateChunks
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(){
-        @synchronized([socket world])
-        {
-            if (socket) {
-                int chunk_view_distance = 3;
-                //int pl = chunk_view_distance * 2 + 1;
-                //int i = 0;
-                int ccx = [[socket player] x] / 16;
-                int ccz = [[socket player] z] / 16;
-                id world = [socket world];
-                verts = 0;
-                NSMutableArray* drawn = [[NSMutableArray alloc] initWithCapacity:[[world chunkPool] count]];
-                for (int cx = -chunk_view_distance; cx < chunk_view_distance; cx++) {
-                    int crx = ccx + cx;
-                    for (int cz = -chunk_view_distance; cz < chunk_view_distance; cz++) {
-                        int crz = ccz + cz;
-                        MCChunk * chk = [world chunkAtCoord:MCChunkCoordMake(crx, crz) allocate:NO];
-                        if (chk) {
-                            [drawn addObject:chk];
-                            // ergh, this used to be something useful. i am 12 and wat is dis
-                            if ([chk shouldBeRendered]) {
-                                glBindBuffer(GL_ARRAY_BUFFER, [chk vbo]);
-                                glEnableClientState(GL_VERTEX_ARRAY);
-                                glVertexPointer([chk vertexSize], GL_BYTE, 0, (void*)0);
-                                //glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
-                                glDrawArrays(GL_TRIANGLES, 0, [chk vertexSize]);
-                                glDisableClientState(GL_VERTEX_ARRAY);
-                            }
-                            [chk setShouldBeRendered:YES];
-                        }
-                    }
-                }
-            draw:
-                // FUK U
-                for (id key in [world chunkPool]) {
-                    id obj = [[world chunkPool] objectForKey:key];
-                    if (![drawn containsObject:obj]) {
-                        [obj setShouldBeRendered:NO];
-                    }
-                }
-                [drawn release];
-            }
-        
-        }
+        [self updateChunksSync];
     });
+}
+
+- (void)updateChunksSync
+{
+    @synchronized([socket world])
+    {
+        if (socket) {
+            int chunk_view_distance = 3;
+            //int pl = chunk_view_distance * 2 + 1;
+            //int i = 0;
+            int ccx = [[socket player] x] / 16;
+            int ccz = [[socket player] z] / 16;
+            id world = [socket world];
+            verts = 0;
+            NSMutableArray* drawn = [[NSMutableArray alloc] initWithCapacity:[[world chunkPool] count]];
+            for (int cx = -chunk_view_distance; cx < chunk_view_distance; cx++) {
+                int crx = ccx + cx;
+                for (int cz = -chunk_view_distance; cz < chunk_view_distance; cz++) {
+                    int crz = ccz + cz;
+                    MCChunk * chk = [world chunkAtCoord:MCChunkCoordMake(crx, crz) allocate:NO];
+                    if (chk) {
+                        [drawn addObject:chk];
+                        // ergh, this used to be something useful. i am 12 and wat is dis
+                        if ([chk shouldBeRendered]) {
+                            glBindBuffer(GL_ARRAY_BUFFER, [chk vbo]);
+                            glBufferData(GL_ARRAY_BUFFER, [chk vertexSize]*3, [chk vertexData], GL_STATIC_DRAW);
+                            glEnableClientState(GL_VERTEX_ARRAY);
+                            glVertexPointer([chk vertexSize], GL_BYTE, 0, (void*)0);
+                            glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, _modelViewProjectionMatrix.m);
+                            glDrawArrays(GL_TRIANGLES, 0, [chk vertexSize]);
+                            glDisableClientState(GL_VERTEX_ARRAY);
+                        }
+                        [chk setShouldBeRendered:YES];
+                    }
+                }
+            }
+        draw:
+            // FUK U
+            for (id key in [world chunkPool]) {
+                id obj = [[world chunkPool] objectForKey:key];
+                if (![drawn containsObject:obj]) {
+                    [obj setShouldBeRendered:NO];
+                }
+            }
+            [drawn release];
+        }
+        
+    }
 }
 
 - (void)chunkDidUpdate:(MCChunk *)chunk
@@ -527,7 +533,6 @@ GLfloat gCubeVertexData[216] =
         }
     
     */
-
     float aspect = fabsf(self.view.bounds.size.width / self.view.bounds.size.height);
      GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(65.0f), aspect, 0.1f, 15.0f);
      self.effect.transform.projectionMatrix = projectionMatrix;
@@ -544,6 +549,9 @@ GLfloat gCubeVertexData[216] =
      _normalMatrix = GLKMatrix3InvertAndTranspose(GLKMatrix4GetMatrix3(modelViewMatrix), NULL);
      
      _modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
+    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    [self updateChunksSync];
 }
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
@@ -562,8 +570,6 @@ GLfloat gCubeVertexData[216] =
     glUniformMatrix3fv(uniforms[UNIFORM_NORMAL_MATRIX], 1, 0, _normalMatrix.m);
     
     glDrawArrays(GL_TRIANGLES, 0, 36);*/
-    glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 #pragma mark -  OpenGL ES 2 shader compilation
