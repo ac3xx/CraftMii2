@@ -15,7 +15,8 @@
 ### I'm on twitter: follow me for news on the project!
 * http://twitter.com/qwertyoruiop
 
-### Donations are greatly accepted. I'll use the money to fund my Tor exit node, which currently serves over 240Mbps of Tor data as well as to fund CraftMii's developement.
+### Donations are greatly accepted.
+* I'll use the money to fund my Tor exit node, which currently serves over 240Mbps of Tor data as well as to fund CraftMii's developement.
 * PayPal: info@qwertyoruiop.com
 
 ### IRC?!
