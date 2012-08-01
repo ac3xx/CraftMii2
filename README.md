@@ -1,7 +1,7 @@
-## Welcome to CraftMii
-# CraftMii is a Minecraft client for iOS.
+# Welcome to CraftMii
+## CraftMii is a Minecraft client for iOS.
 
--- Infos
+### Infos
 * CraftMii aims to be fully compatible with 1.2.5.
 * 1.3 compatibility can be added easily, but we at least need to get 1.2.5's world rendered
 * I fail at OpenGL. The whole OGL thing /is/ broken. MCChunk has issues (sections corrupted for some reason etc.)
@@ -12,11 +12,11 @@
 * If you do modify the code and improve the app, we kindly ask you to fork the repo and send us a pull request.
 * terrain.png is copyrighted by Mojang. Sorry for that, I don't even use it at the moment. I should remove it or make it work decently (and get Mojang's permission to use it / user alternative artwork for it).
 
--- I'm on twitter: follow me for news on the project!
+### I'm on twitter: follow me for news on the project!
 * http://twitter.com/qwertyoruiop
 
--- Donations are greatly accepted. I'll use the money to fund my Tor exit node, which currently serves over 240Mbps of Tor data as well as to fund CraftMii's developement.
+### Donations are greatly accepted. I'll use the money to fund my Tor exit node, which currently serves over 240Mbps of Tor data as well as to fund CraftMii's developement.
 * PayPal: info@qwertyoruiop.com
 
--- IRC?!
+### IRC?!
 * irc.nixtrixirc.net #craftmii
