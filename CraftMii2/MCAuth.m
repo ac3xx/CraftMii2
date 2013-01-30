@@ -81,7 +81,7 @@ end:
         NSURLRequest *request = [[[NSURLRequest alloc] initWithURL: [NSURL URLWithString:[NSString stringWithFormat:@"https://login.minecraft.net/?user=%@&password=%@&version=12", [self username], [self password]]]] autorelease];
         NSString *serverResponse = [[[NSString alloc] initWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil] encoding:NSUTF8StringEncoding] autorelease];
         NSArray* kr=[serverResponse componentsSeparatedByString:@":"];
-        if ([kr count]==4) {
+        if ([kr count]==5) {
             [self setUsername:[kr objectAtIndex:2]];
             [loginDict setValue:[kr objectAtIndex:3] forKey:kMCAuthToken];
             [loginDict setValue:@"Success" forKey:kMCAuthResult];
